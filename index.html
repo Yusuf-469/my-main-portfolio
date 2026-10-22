@@ -8,7 +8,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#eceef0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101417" media="(prefers-color-scheme: dark)">
-<script>(function(d){if(!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;if('IntersectionObserver' in window)d.className+=' rv-on';if(window.innerHeight>=520)d.className+=' scrolly';})(document.documentElement);</script>
+<script>(function(d){if('IntersectionObserver' in window)d.className+=' rv-on';if(window.innerHeight>=520)d.className+=' scrolly';})(document.documentElement);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
@@ -61,7 +61,7 @@
 *{margin:0;padding:0}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+html{scroll-behavior:smooth}
 body{
   background:var(--bg);color:var(--ink);
   font:400 16px/1.6 var(--f-body);
@@ -136,7 +136,7 @@ ul{list-style:none}
 }
 
 /* first-load motion */
-@media (prefers-reduced-motion:no-preference){
+@media all{
   .ph{animation:pop .9s cubic-bezier(.34,1.4,.5,1) backwards}
   .h-name-in{animation:nameIn .8s var(--ease) .35s backwards}
 }
@@ -278,10 +278,6 @@ ul{list-style:none}
 .rv-on .rv.out{opacity:0;transform:translateY(-26px)}
 .rv-on .rv.snap{transition:none!important}
 
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
-  .chart .bar{transform:none}
-}
 @media print{
   .rv-on .rv,.scrolly .hero *{opacity:1!important;transform:none!important;filter:none!important}
   .scrolly .hero{height:auto}.scrolly .hero-stage{position:static;height:auto}
@@ -538,7 +534,7 @@ ul{list-style:none}
 (function(){
   'use strict';
   var root=document.documentElement;
-  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reduce=false; /* always animate, regardless of the OS motion setting */
   var $=function(s,c){return (c||document).querySelector(s)};
   var $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
 
