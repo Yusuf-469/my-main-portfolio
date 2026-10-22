@@ -244,6 +244,7 @@ ul{list-style:none}
 .lnk{display:inline-flex;align-items:center;gap:6px;min-height:32px;font-family:var(--f-mono);font-size:13px;color:var(--accent);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
 .lnk:hover{border-bottom-color:var(--accent)}
 .lnk svg{width:12px;height:12px}
+.lnk-note{flex-basis:100%;font-size:13px;color:var(--muted)}
 @media (min-width:760px){
   .sheet{grid-template-columns:var(--rail) minmax(0,1fr);column-gap:32px}
   .sheet-title{border-top:1px solid var(--ink);padding-top:12px}
@@ -431,7 +432,7 @@ ul{list-style:none}
               <svg role="img" aria-label="Bar chart, Hit@5 on 48 questions: fixed-size 83.3%, recursive 89.6%, section-aware 95.8%."></svg>
             </figure>
             <p class="sheet-note rv">One question is 2.1 points on a 48-question set. The models are pretrained. Educational project, not medical advice.</p>
-            <div class="sheet-links rv"><a class="lnk" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener">medicrag.streamlit.app<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a><a class="lnk" href="https://github.com/Yusuf-469/RAG" target="_blank" rel="noopener">github.com/Yusuf-469/RAG<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a></div>
+            <div class="sheet-links rv"><a class="lnk" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener">medicrag.streamlit.app<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a><a class="lnk" href="https://github.com/Yusuf-469/RAG" target="_blank" rel="noopener">github.com/Yusuf-469/RAG<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a><span class="lnk-note">The demo is hosted on Streamlit Community Cloud and may take a few seconds to wake up.</span></div>
           </div>
         </article>
 
