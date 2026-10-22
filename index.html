@@ -168,6 +168,15 @@ ul{list-style:none}
 .scrolly .hero.s3 .h-intro{transition-delay:.16s}
 .scrolly .hero.s3 .h-skills{transition-delay:.24s}
 .scrolly .hero.s3 .h-actions{transition-delay:.32s}
+/* scroll hint: appears after the opening animation, leaves at s1 */
+.cue{display:none}
+.scrolly .cue{display:block;position:absolute;left:0;right:0;bottom:max(24px,env(safe-area-inset-bottom));pointer-events:none;animation:cueIn .7s var(--ease) 1.6s backwards}
+.cue-in{display:inline-flex;align-items:center;gap:12px;color:var(--muted);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.scrolly .hero.s1 .cue-in{opacity:0;transform:translateY(10px)}
+.cue-line{position:relative;width:1px;height:40px;background:var(--line-strong);overflow:hidden}
+.cue-line::after{content:"";position:absolute;left:0;top:0;width:1px;height:16px;background:var(--accent);animation:cueRun 1.8s cubic-bezier(.6,0,.4,1) infinite}
+@keyframes cueIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes cueRun{from{transform:translateY(-16px)}to{transform:translateY(40px)}}
 /* keyboard users can always reach the hero buttons */
 .scrolly .hero .h-actions:focus-within{opacity:1;transform:none;filter:none;pointer-events:auto}
 
@@ -336,6 +345,7 @@ ul{list-style:none}
           </div>
         </div>
       </div>
+      <div class="cue" aria-hidden="true"><div class="wrap"><span class="cue-in"><span class="cue-line"></span><span class="mono">Scroll to continue</span></span></div></div>
     </div>
   </section>
 
