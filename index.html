@@ -358,6 +358,8 @@ ul{list-style:none}
 .chart .bar.hi{fill:var(--accent)}
 .chart.play .bar{transform:scaleX(1)}
 .chart.reset .bar{transition:none}
+.chart .base{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3;shape-rendering:crispEdges}
+.chart .base-lbl{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink)}
 
 /* contact */
 .contact-line{font-size:clamp(19px,.8vw + 15px,24px);line-height:1.45;max-width:40ch}
@@ -600,6 +602,12 @@ ul{list-style:none}
           <p class="gl-tag mono">Personal · solo · Oct 2026</p>
           <ul class="gl-stack" aria-label="Stack"><li title="Python"><svg class="ic" role="img" aria-label="Python"><use href="#i-python"/></svg></li><li class="tx">PyMuPDF</li><li class="tx">FAISS</li><li title="FastAPI"><svg class="ic" role="img" aria-label="FastAPI"><use href="#i-fastapi"/></svg></li><li title="Streamlit"><svg class="ic" role="img" aria-label="Streamlit"><use href="#i-streamlit"/></svg></li><li title="Docker"><svg class="ic" role="img" aria-label="Docker"><use href="#i-docker"/></svg></li><li title="pytest"><svg class="ic" role="img" aria-label="pytest"><use href="#i-pytest"/></svg></li><li title="GitHub Actions"><svg class="ic" role="img" aria-label="GitHub Actions"><use href="#i-gha"/></svg></li></ul>
         </article>
+        <article class="gl rv" id="gl-neuro">
+          <a class="pv" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neuro-rose.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neuro.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Neuro landing page, headed Your mind. Finally visible."><video muted loop playsinline preload="none" data-src="assets/videos/neuro.mp4" aria-hidden="true"></video></span></a>
+          <h3 class="gl-title"><a href="#neuro">Neuro</a></h3>
+          <p class="gl-tag mono">Academic · May 2026</p>
+          <ul class="gl-stack" aria-label="Stack"><li title="Python"><svg class="ic" role="img" aria-label="Python"><use href="#i-python"/></svg></li><li title="Pandas"><svg class="ic" role="img" aria-label="Pandas"><use href="#i-pandas"/></svg></li><li title="NumPy"><svg class="ic" role="img" aria-label="NumPy"><use href="#i-numpy"/></svg></li><li title="scikit-learn"><svg class="ic" role="img" aria-label="scikit-learn"><use href="#i-sklearn"/></svg></li><li class="tx">XGBoost</li><li class="tx">LightGBM</li><li class="tx">imbalanced-learn</li><li class="tx">SHAP</li><li title="FastAPI"><svg class="ic" role="img" aria-label="FastAPI"><use href="#i-fastapi"/></svg></li><li title="Vercel"><svg class="ic" role="img" aria-label="Vercel"><use href="#i-vercel"/></svg></li></ul>
+        </article>
         <article class="gl rv" id="gl-healix">
           <a class="pv" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">devops-zeta-nine.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healix.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Healix landing page with its brain-and-circuit logo"><video muted loop playsinline preload="none" data-src="assets/videos/healix.mp4" aria-hidden="true"></video></span></a>
           <h3 class="gl-title"><a href="#healix">Healix</a></h3>
@@ -611,12 +619,6 @@ ul{list-style:none}
           <h3 class="gl-title"><a href="#healthmonitor">HealthMonitor</a></h3>
           <p class="gl-tag mono">Academic</p>
           <ul class="gl-stack" aria-label="Stack"><li title="ESP32"><svg class="ic" role="img" aria-label="ESP32"><use href="#i-esp"/></svg></li><li title="Embedded C/C++"><svg class="ic" role="img" aria-label="Embedded C/C++"><use href="#i-cpp"/></svg></li><li title="Firebase"><svg class="ic" role="img" aria-label="Firebase"><use href="#i-firebase"/></svg></li><li title="Node.js"><svg class="ic" role="img" aria-label="Node.js"><use href="#i-node"/></svg></li><li title="Express"><svg class="ic" role="img" aria-label="Express"><use href="#i-express"/></svg></li><li title="JWT"><svg class="ic" role="img" aria-label="JWT"><use href="#i-jwt"/></svg></li><li title="Jest"><svg class="ic" role="img" aria-label="Jest"><use href="#i-jest"/></svg></li><li title="Chart.js"><svg class="ic" role="img" aria-label="Chart.js"><use href="#i-chartjs"/></svg></li><li title="Vercel"><svg class="ic" role="img" aria-label="Vercel"><use href="#i-vercel"/></svg></li></ul>
-        </article>
-        <article class="gl rv" id="gl-neuro">
-          <a class="pv" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neuro-rose.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neuro.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Neuro landing page, headed Your mind. Finally visible."><video muted loop playsinline preload="none" data-src="assets/videos/neuro.mp4" aria-hidden="true"></video></span></a>
-          <h3 class="gl-title"><a href="#neuro">Neuro</a></h3>
-          <p class="gl-tag mono">Academic</p>
-          <ul class="gl-stack" aria-label="Stack"><li title="Python"><svg class="ic" role="img" aria-label="Python"><use href="#i-python"/></svg></li><li title="Pandas"><svg class="ic" role="img" aria-label="Pandas"><use href="#i-pandas"/></svg></li><li title="NumPy"><svg class="ic" role="img" aria-label="NumPy"><use href="#i-numpy"/></svg></li><li title="scikit-learn"><svg class="ic" role="img" aria-label="scikit-learn"><use href="#i-sklearn"/></svg></li><li class="tx">XGBoost</li><li class="tx">LightGBM</li><li class="tx">SHAP</li><li title="FastAPI"><svg class="ic" role="img" aria-label="FastAPI"><use href="#i-fastapi"/></svg></li><li title="Vercel"><svg class="ic" role="img" aria-label="Vercel"><use href="#i-vercel"/></svg></li></ul>
         </article>
         <article class="gl rv" id="gl-silentstress">
           <a class="pv" href="https://secret-stress.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">secret-stress.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/silentstress.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Silent Stress home page with an anonymous sign-in form"><video muted loop playsinline preload="none" data-src="assets/videos/silentstress.mp4" aria-hidden="true"></video></span></a>
@@ -665,12 +667,36 @@ ul{list-style:none}
               <div class="rv"><dt>Result</dt><dd><strong>95.8% Hit@5</strong> and <strong>0.741 MRR</strong> on that 48-question set. <strong>44 of 48</strong> answers correct in my manual audit. <strong>11 of 11</strong> out-of-scope questions refused. <strong>0</strong> citations to sources the model was not given.</dd></div>
               <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile nl">PyMuPDF</li><li class="tile nl">FAISS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-streamlit"/></svg>Streamlit</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pytest"/></svg>pytest</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-gha"/></svg>GitHub Actions</li></ul></dd></div>
             </dl>
-            <figure class="chart rv" id="hit5">
+            <figure class="chart rv" id="hit5" data-dec="1" data-unit="Hit@5 (n = 48)" data-rows='[["Fixed-size",83.3,0],["Recursive",89.6,0],["Section-aware",95.8,1]]'>
               <figcaption><span class="mono">Hit@5 by chunking strategy · n = 48 questions</span><strong>Section-aware chunking retrieved the right passage most often</strong></figcaption>
               <svg role="img" aria-label="Bar chart, Hit@5 on 48 questions: fixed-size 83.3%, recursive 89.6%, section-aware 95.8%."></svg>
             </figure>
             <p class="sheet-note rv">One question is 2.1 points on a 48-question set. The models are pretrained. Educational project, not medical advice.</p>
             <div class="sheet-links rv"><a class="lnk" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener">medicrag.streamlit.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><a class="lnk" href="https://github.com/Yusuf-469/RAG" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>github.com/Yusuf-469/RAG<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><span class="lnk-note">The demo is hosted on Streamlit Community Cloud and may take a few seconds to wake up.</span></div>
+          </div>
+        </article>
+
+        <article class="sheet" id="neuro" data-cat="ai">
+          <div class="sheet-label rv rv-left"><span class="tag mono">Academic</span><span class="date mono">May 2026</span></div>
+          <div class="sheet-body">
+            <h3 class="sheet-title rv">Neuro</h3>
+            <p class="sheet-sum rv">A controlled comparison of 7 classical ML and 2 deep learning models that classify healthy and mood-disorder subjects from EEG features, with SHAP explanations and a FastAPI service.</p>
+            <a class="pv rv" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neuro-rose.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neuro.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Neuro landing page, headed Your mind. Finally visible."><video muted loop playsinline preload="none" data-src="assets/videos/neuro.mp4" aria-hidden="true"></video></span></a>
+            <dl class="rows">
+              <div class="rv"><dt>Problem</dt><dd>Depression screening still leans on questionnaires and interviews. EEG is an objective signal but noisy and high-dimensional, and published comparisons of classical ML and deep learning often use different preprocessing, so it is unclear which actually works on a small EEG dataset.</dd></div>
+              <div class="rv"><dt>Data</dt><dd>The public BRMH EEG Psychiatric Disorders dataset, filtered to a binary task: healthy controls vs mood disorder (n = 361). Stratified 80/20 split, leaving 73 held-out test subjects.</dd></div>
+              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Pipeline"><li>EEG features</li><li>FAA, θ/α, β/α, δ asymmetry</li><li>StandardScaler</li><li>PCA, 95% variance</li><li>SMOTE, train only</li><li>7 ML + 2 DL models</li><li>5-fold CV + test</li><li>SHAP</li><li>FastAPI</li></ol></dd></div>
+              <div class="rv"><dt>Built</dt><dd>Four clinically motivated biomarkers: frontal alpha asymmetry, theta/alpha ratio, beta/alpha ratio and delta asymmetry. Mean imputation, StandardScaler, PCA keeping 95% of the variance, SelectKBest, and SMOTE on the training data only. Models: logistic regression, SVM (RBF), random forest, XGBoost, LightGBM, MLP and a voting ensemble, plus a fully connected ANN and a CNN+LSTM. SHAP on XGBoost, and a FastAPI service for inference.</dd></div>
+              <div class="rv"><dt>Tested</dt><dd>Every model got the same preprocessing and the same split: stratified 5-fold cross-validation, then the 73 held-out subjects, against a majority-class baseline of 73.7%.</dd></div>
+              <div class="rv"><dt>Result</dt><dd>XGBoost and the voting ensemble tied at <strong>80.82%</strong> test accuracy (cross-validation <strong>77.8% ± 2.7</strong> and <strong>79.8% ± 5.7</strong>). The deep learning models reached <strong>68.49%</strong>, below the baseline: on a small, structured dataset, classical ML won. SHAP ranked frontal alpha and theta features highest, in line with the clinical literature.</dd></div>
+              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pandas"/></svg>Pandas</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-numpy"/></svg>NumPy</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-sklearn"/></svg>scikit-learn</li><li class="tile nl">XGBoost</li><li class="tile nl">LightGBM</li><li class="tile nl">imbalanced-learn</li><li class="tile nl">SHAP</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul></dd></div>
+            </dl>
+            <figure class="chart rv" id="neuro-acc" data-dec="2" data-unit="test accuracy (n = 73)" data-base="73.7" data-base-label="Majority baseline 73.7%" data-rows='[["XGBoost",80.82,1],["Voting ensemble",80.82,1],["LightGBM",78.08,0],["Random forest",76.71,0],["SVM",75.34,0],["MLP",71.23,0],["Logistic regression",69.86,0],["ANN, CNN+LSTM",68.49,0]]'>
+              <figcaption><span class="mono">Test accuracy by model · n = 73 held-out subjects</span><strong>Boosted trees beat deep learning on a small EEG dataset</strong></figcaption>
+              <svg role="img" aria-label="Bar chart of test accuracy on 73 held-out subjects: XGBoost 80.82%, voting ensemble 80.82%, LightGBM 78.08%, random forest 76.71%, SVM 75.34%, MLP 71.23%, logistic regression 69.86%, ANN and CNN+LSTM 68.49%. Majority-class baseline 73.7%."></svg>
+            </figure>
+            <p class="sheet-note rv">Academic minor project, SRM IST. One test subject is 1.4 points; at n = 73 there is about 9 points of uncertainty. Not a diagnostic tool.</p>
+            <div class="sheet-links rv"><a class="lnk" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener">neuro-rose.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
           </div>
         </article>
 
@@ -710,24 +736,6 @@ ul{list-style:none}
           </div>
         </article>
 
-        <article class="sheet" id="neuro" data-cat="ai">
-          <div class="sheet-label rv rv-left"><span class="tag mono">Academic</span></div>
-          <div class="sheet-body">
-            <h3 class="sheet-title rv">Neuro</h3>
-            <p class="sheet-sum rv">An end-to-end ML pipeline that classifies healthy and mood-disorder subjects from EEG band-power features, with SHAP explanations and a FastAPI service.</p>
-            <a class="pv rv" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neuro-rose.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neuro.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Neuro landing page, headed Your mind. Finally visible."><video muted loop playsinline preload="none" data-src="assets/videos/neuro.mp4" aria-hidden="true"></video></span></a>
-            <dl class="rows">
-              <div class="rv"><dt>Problem</dt><dd>Classify mood disorders from EEG data on a small dataset (n = 361), and check the model beats the simplest possible guess.</dd></div>
-              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Pipeline"><li>EEG features</li><li>Feature engineering</li><li>StandardScaler</li><li>PCA</li><li>SMOTE</li><li>9 ML/DL models</li><li>5-fold CV + test</li><li>SHAP</li><li>FastAPI</li></ol></dd></div>
-              <div class="rv"><dt>Built</dt><dd>Imputation, StandardScaler, PCA and SMOTE (applied to training data only), plus engineered FAA and theta/alpha biomarkers. XGBoost and LightGBM among the models, SHAP for explanations and FastAPI for serving.</dd></div>
-              <div class="rv"><dt>Tested</dt><dd>7 ML and 2 deep learning models (ANN, CNN-LSTM) compared with stratified 5-fold cross-validation, then on 73 held-out samples against a majority-class baseline of 73.7%.</dd></div>
-              <div class="rv"><dt>Result</dt><dd>XGBoost and the voting ensemble reached <strong>80.82%</strong> test accuracy against the <strong>73.7%</strong> baseline, on 73 held-out samples. At that size there is about 9 points of uncertainty.</dd></div>
-              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pandas"/></svg>Pandas</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-numpy"/></svg>NumPy</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-sklearn"/></svg>scikit-learn</li><li class="tile nl">XGBoost</li><li class="tile nl">LightGBM</li><li class="tile nl">SHAP</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul></dd></div>
-            </dl>
-            <p class="sheet-note rv">Academic project. Not a diagnostic tool.</p>
-            <div class="sheet-links rv"><a class="lnk" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener">neuro-rose.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
-          </div>
-        </article>
 
         <article class="sheet" id="small-apps" data-cat="web">
           <div class="sheet-label rv rv-left"><span class="tag mono">Personal</span></div>
@@ -841,57 +849,65 @@ ul{list-style:none}
     rvs.forEach(function(el){io.observe(el)});
   }
 
-  /* chart: Hit@5 by chunking strategy */
-  var fig=$('#hit5'),svg=fig&&$('svg',fig),vals=[];
-  var data=[['Fixed-size',83.3,false],['Recursive',89.6,false],['Section-aware',95.8,true]];
+  /* horizontal bar charts: data lives on each <figure class="chart"> */
   var NS='http://www.w3.org/2000/svg';
   function el(name,attrs,text){var n=document.createElementNS(NS,name);for(var k in attrs)n.setAttribute(k,attrs[k]);if(text!=null)n.textContent=text;return n}
-  function draw(){
-    var W=Math.max(240,Math.round(svg.getBoundingClientRect().width));
-    var labelW=W<380?96:112,valW=64,x0=labelW,x1=W-valW,bh=18,pitch=32,top=6;
-    var H=top+data.length*pitch+20,plotB=top+data.length*pitch-6;
-    svg.setAttribute('viewBox','0 0 '+W+' '+H);
-    svg.setAttribute('width',W);svg.setAttribute('height',H);
-    while(svg.firstChild)svg.removeChild(svg.firstChild);
-    [0,50,100].forEach(function(t){
-      var x=Math.round(x0+(x1-x0)*t/100)+.5;
-      svg.appendChild(el('line',{'class':'grid'+(t===0?' zero':''),x1:x,x2:x,y1:top-4,y2:plotB}));
-      svg.appendChild(el('text',{'class':'tick',x:x,y:H-4,'text-anchor':t===0?'start':(t===100?'end':'middle')},t));
-    });
-    vals=[];
-    data.forEach(function(d,i){
-      var y=top+i*pitch+(pitch-6-bh)/2,w=(x1-x0)*d[1]/100,r=4;
-      svg.appendChild(el('text',{'class':'cat',x:0,y:y+bh/2+4},d[0]));
-      var path='M'+x0+' '+y+'H'+(x0+w-r)+'Q'+(x0+w)+' '+y+' '+(x0+w)+' '+(y+r)+'V'+(y+bh-r)+'Q'+(x0+w)+' '+(y+bh)+' '+(x0+w-r)+' '+(y+bh)+'H'+x0+'Z';
-      var b=el('path',{'class':'bar'+(d[2]?' hi':''),d:path});
-      b.appendChild(el('title',{},d[0]+': '+d[1].toFixed(1)+'% Hit@5 (n = 48)'));
-      svg.appendChild(b);
-      var v=el('text',{'class':'val'+(d[2]?' hi':''),x:W,y:y+bh/2+4,'text-anchor':'end'},(fig.classList.contains('play')?d[1]:0).toFixed(1)+'%');
-      svg.appendChild(v);vals.push(v);
-    });
-  }
-  var raf=0;
-  function count(){
-    var t0=performance.now();cancelAnimationFrame(raf);
-    (function step(now){
-      var k=Math.min(1,(now-t0)/1100),e=1-Math.pow(1-k,3);
-      vals.forEach(function(v,i){v.textContent=(data[i][1]*e).toFixed(1)+'%'});
-      if(k<1)raf=requestAnimationFrame(step);
-    })(t0);
-  }
-  function play(){if(fig.classList.contains('play'))return;fig.classList.add('play');count()}
-  function reset(){
-    cancelAnimationFrame(raf);
-    fig.classList.add('reset');fig.classList.remove('play');void fig.offsetWidth;fig.classList.remove('reset');
-    vals.forEach(function(v){v.textContent='0.0%'});
-  }
-  if(svg){
+  $$('figure.chart[data-rows]').forEach(function(fig){
+    var svg=$('svg',fig),vals=[],raf=0;
+    var data=JSON.parse(fig.dataset.rows),dec=+(fig.dataset.dec||1),unit=fig.dataset.unit||'',base=fig.dataset.base?+fig.dataset.base:null;
+    var fmt=function(v){return v.toFixed(dec)+'%'};
+    function draw(){
+      var W=Math.max(240,Math.round(svg.getBoundingClientRect().width));
+      var longest=data.reduce(function(m,d){return Math.max(m,d[0].length)},0);
+      var stack=W<440;  /* narrow screens: label sits above its bar */
+      var labelW=stack?0:Math.min(Math.round(W*.44),Math.round(longest*7.2+12)),valW=dec>1?70:64,x0=labelW,x1=W-valW,bh=stack?14:18,pitch=stack?40:32,lab=stack?16:0,top=base!=null?20:6;
+      var H=top+data.length*pitch+20,plotB=top+data.length*pitch-6;
+      var X=function(v){return x0+(x1-x0)*v/100};
+      svg.setAttribute('viewBox','0 0 '+W+' '+H);
+      svg.setAttribute('width',W);svg.setAttribute('height',H);
+      while(svg.firstChild)svg.removeChild(svg.firstChild);
+      [0,50,100].forEach(function(t){
+        var x=Math.round(X(t))+.5;
+        svg.appendChild(el('line',{'class':'grid'+(t===0?' zero':''),x1:x,x2:x,y1:top-4,y2:plotB}));
+        svg.appendChild(el('text',{'class':'tick',x:x,y:H-4,'text-anchor':t===0?'start':(t===100?'end':'middle')},t));
+      });
+      vals=[];
+      data.forEach(function(d,i){
+        var y=top+i*pitch+lab+(pitch-6-lab-bh)/2,w=X(d[1])-x0,r=4;
+        svg.appendChild(el('text',{'class':'cat',x:0,y:stack?y-5:y+bh/2+4},d[0]));
+        var path='M'+x0+' '+y+'H'+(x0+w-r)+'Q'+(x0+w)+' '+y+' '+(x0+w)+' '+(y+r)+'V'+(y+bh-r)+'Q'+(x0+w)+' '+(y+bh)+' '+(x0+w-r)+' '+(y+bh)+'H'+x0+'Z';
+        var bEl=el('path',{'class':'bar'+(d[2]?' hi':''),d:path});
+        bEl.appendChild(el('title',{},d[0]+': '+fmt(d[1])+' '+unit));
+        svg.appendChild(bEl);
+        var v=el('text',{'class':'val'+(d[2]?' hi':''),x:W,y:y+bh/2+4,'text-anchor':'end'},fmt(fig.classList.contains('play')?d[1]:0));
+        svg.appendChild(v);vals.push(v);
+      });
+      if(base!=null){
+        var bx=Math.round(X(base))+.5;
+        svg.appendChild(el('line',{'class':'base',x1:bx,x2:bx,y1:top-8,y2:plotB}));
+        svg.appendChild(el('text',{'class':'base-lbl',x:bx,y:top-11,'text-anchor':'middle'},fig.dataset.baseLabel||fmt(base)));
+      }
+    }
+    function count(){
+      var t0=performance.now();cancelAnimationFrame(raf);
+      (function step(now){
+        var k=Math.min(1,(now-t0)/1100),e=1-Math.pow(1-k,3);
+        vals.forEach(function(v,i){v.textContent=fmt(data[i][1]*e)});
+        if(k<1)raf=requestAnimationFrame(step);
+      })(t0);
+    }
+    function play(){if(fig.classList.contains('play'))return;fig.classList.add('play');count()}
+    function reset(){
+      cancelAnimationFrame(raf);
+      fig.classList.add('reset');fig.classList.remove('play');void fig.offsetWidth;fig.classList.remove('reset');
+      vals.forEach(function(v){v.textContent=fmt(0)});
+    }
     draw();
     if('ResizeObserver' in window){var lastW=0;new ResizeObserver(function(){var w=Math.round(fig.getBoundingClientRect().width);if(w!==lastW){lastW=w;draw()}}).observe(fig)}
     else addEventListener('resize',draw);
     if(!('IntersectionObserver' in window)){play()}
     else new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)play();else reset()})},{threshold:.35}).observe(fig);
-  }
+  });
 
   /* filters (projects only) */
   var chips=$$('.chip'),projects=$$('#projects [data-cat]');
