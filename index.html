@@ -192,17 +192,22 @@ ul{list-style:none}
 
 /* SECTIONS */
 .section{position:relative;z-index:2;padding-block:clamp(72px,10vw,128px)}
+.section{overflow-x:hidden}
+@supports (overflow-x:clip){.section{overflow-x:clip}}
 .section + .section{padding-top:0}
 .section .wrap{display:flex;flex-direction:column;gap:clamp(28px,4vw,44px)}
 [id]{scroll-margin-top:calc(var(--hh) + 40px)}
-.sec-head{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
-.sec-label{color:var(--muted);border-top:1px solid var(--ink);padding-top:12px;display:flex;gap:10px}
+.sec-head{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.sec-num{position:absolute;right:0;top:-.18em;z-index:-1;font:700 clamp(110px,16vw,220px)/1 var(--f-display);letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1px var(--line-strong);opacity:.55;pointer-events:none;user-select:none}
+.sec-label{position:relative;color:var(--muted);padding-top:12px;display:flex;gap:10px}
+.sec-label::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--ink);transform-origin:0 50%}
 .sec-label b{font-weight:500;color:var(--accent)}
 .sec-title{font:700 clamp(34px,3.6vw + 16px,56px)/1 var(--f-display);letter-spacing:-.035em;font-variation-settings:"opsz" 96}
 .sec-intro{max-width:62ch;color:var(--muted);font-size:17px}
 @media (min-width:760px){
   .sec-head{grid-template-columns:var(--rail) minmax(0,1fr);column-gap:32px;align-items:start}
-  .sec-title{border-top:1px solid var(--ink);padding-top:14px}
+  .sec-title{position:relative;padding-top:14px}
+  .sec-title::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--ink);transform-origin:0 50%}
   .sec-head .sec-intro{grid-column:2}
 }
 
@@ -230,19 +235,38 @@ ul{list-style:none}
 .tile .ic{transition:transform .35s var(--ease)}
 .tile:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 10px 22px -16px var(--shadow)}
 .tile:hover .ic{transform:scale(1.14) rotate(-4deg)}
-.tile.nl::before{content:"";width:7px;height:7px;margin:0 5px 0 5px;border:1px solid var(--accent);transform:rotate(45deg);flex:none}
+.tile.nl{padding:0 14px}
 .tile.cpt{border-style:dashed;color:var(--muted);font-weight:400;padding:0 13px}
 .mini .tile{min-height:30px;font-size:13px;padding:0 10px 0 8px;gap:7px}
 .mini .tile .ic{width:16px;height:16px}
-.mini .tile.nl::before{margin:0 3px 0 4px}
+.mini .tile.nl{padding:0 10px}
 .mini .tile.cpt{padding:0 10px}
 .rv-on .sg .tile{opacity:0;transform:translateY(10px) scale(.96);transition:opacity .45s var(--ease),transform .45s var(--ease),border-color .25s,box-shadow .3s}
 .rv-on .sg.in .tile{opacity:1;transform:none;transition-delay:calc(var(--t,0) * 30ms + 140ms)}
 .rv-on .sg.in .tile:hover{transform:translateY(-2px);transition-delay:0s}
-.stack-key{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:13px}
-.stack-key span{display:inline-flex;align-items:center;gap:8px}
-.stack-key .k-nl::before{content:"";width:7px;height:7px;border:1px solid var(--accent);transform:rotate(45deg)}
-.stack-key .k-cpt::before{content:"";width:14px;height:10px;border:1px dashed var(--line-strong);border-radius:2px}
+
+/* education */
+.edu{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:16px}
+.edu-card{display:flex;flex-direction:column;gap:10px;padding:24px;border:1px solid var(--line);background:var(--bg);transition:border-color .3s,transform .4s var(--ease),box-shadow .4s var(--ease)}
+.edu-card:hover{border-color:var(--accent);box-shadow:0 22px 44px -30px var(--shadow)}
+.edu-logo{width:84px;height:84px;display:grid;place-items:center;padding:8px;border-radius:12px;background:#fff;border:1px solid var(--line);margin-bottom:6px}
+.edu-logo img{width:100%;height:100%;object-fit:contain}
+.edu-mono{font:700 30px/1 var(--f-display);letter-spacing:-.04em;color:#0b6b78;background:#fff}
+.edu-tag{color:var(--accent)}
+.edu-name{font:700 22px/1.15 var(--f-display);letter-spacing:-.02em}
+.edu-what{color:var(--ink);font-size:15px;line-height:1.5}
+.edu-where{color:var(--muted)}
+.edu-core{padding-top:6px}
+
+/* project cards */
+.projects{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:28px 24px}
+.proj{display:flex;flex-direction:column;gap:14px;min-width:0}
+.proj .pv{max-width:none}
+.proj-head{display:flex;flex-direction:column;gap:4px}
+.proj-tag{color:var(--accent)}
+.proj-title{font:700 clamp(24px,1.2vw + 18px,30px)/1.05 var(--f-display);letter-spacing:-.03em}
+.proj.flash{animation:flash 1.6s ease-out .45s backwards}
+.proj.flt{animation:fltIn .45s var(--ease)}
 
 /* filters */
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -300,7 +324,12 @@ ul{list-style:none}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 .pv-url{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--f-mono);font-size:12px}
 .pv-ext{width:12px;height:12px;flex:none;transition:transform .3s var(--ease)}
-.pv-img{display:block;aspect-ratio:16/10;overflow:hidden;background:var(--line)}
+.pv-img{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:var(--line)}
+.pv-img video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;opacity:0;transition:opacity .45s var(--ease)}
+.pv.playing .pv-img video{opacity:1}
+.pv-play{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:color .3s}
+.pv-play svg{width:10px;height:10px}
+.pv:hover .pv-play,.pv.playing .pv-play{color:var(--accent)}
 .pv-img img{width:100%;height:100%;object-fit:cover;object-position:top;transition:transform .9s var(--ease)}
 .pv:hover{border-color:var(--accent);box-shadow:0 22px 44px -28px var(--shadow);color:var(--ink)}
 .pv:hover .pv-img img{transform:scale(1.03)}
@@ -338,12 +367,22 @@ ul{list-style:none}
 .foot strong{color:var(--ink);font-weight:500}
 
 /* SCROLL REVEAL (loops both ways) */
-.rv-on .rv{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease);transition-delay:0s}
-.rv-on .rv.rv-left{transform:translateX(-22px)}
-.rv-on .rv.in{opacity:1;transform:none;transition-delay:calc(var(--i,0) * 70ms)}
-.rv-on .rv.out{opacity:0;transform:translateY(-26px)}
+.rv-on .rv{opacity:0;transform:translateY(44px) scale(.985);filter:blur(5px);transition:opacity .8s var(--ease),transform .9s var(--ease),filter .8s var(--ease);transition-delay:0s}
+.rv-on .rv.rv-left{transform:translateX(-36px)}
+.rv-on .rv.in{opacity:1;transform:none;filter:none;transition-delay:calc(var(--i,0) * 70ms)}
+.rv-on .rv.out{opacity:0;transform:translateY(-44px) scale(.985);filter:blur(5px)}
+/* section heads: rules draw across, titles wipe up, big numerals sweep in */
+.rv-on .sec-label::before,.rv-on .sec-title::before{transform:scaleX(0);transition:transform 1.1s var(--ease) .15s}
+.rv-on .sec-label.in::before,.rv-on .sec-title.in::before{transform:scaleX(1)}
+.sec-title .st{display:inline-block}
+.rv-on .sec-title .st{clip-path:inset(0 0 100% 0);transform:translateY(55%);transition:clip-path 1s var(--ease) .05s,transform 1s var(--ease) .05s}
+.rv-on .sec-title.in .st{clip-path:inset(-25% -6% -30% -2%);transform:none}
+.rv-on .sec-title.snap .st{transition:none}
+.rv-on .sec-num.rv{transform:translateX(90px);filter:blur(8px);transition:opacity 1.2s var(--ease),transform 1.4s var(--ease),filter 1.2s var(--ease)}
+.rv-on .sec-num.rv.in{opacity:.55;transform:none;filter:none}
+.rv-on .sec-num.rv.out{opacity:0;transform:translateX(-60px);filter:blur(8px)}
 .rv-on .rv.snap,.rv-on .rv.snap .tile{transition:none!important}
-.rv-on .pv.rv{transition:opacity .7s var(--ease),transform .7s var(--ease),border-color .3s,box-shadow .4s var(--ease)}
+.rv-on .pv.rv{transition:opacity .8s var(--ease),transform .9s var(--ease),filter .8s var(--ease),border-color .3s,box-shadow .4s var(--ease)}
 
 @media print{
   #circuit{display:none}
@@ -367,12 +406,13 @@ ul{list-style:none}
         <ul>
           <li class="opt"><a href="#approach">Approach</a></li>
           <li><a href="#stack">Stack</a></li>
+          <li class="opt"><a href="#education">Education</a></li>
           <li><a href="#experience">Experience</a></li>
           <li><a href="#work">Work</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
       </nav>
-      <a class="btn btn-sm head-cta" href="assets/Md_Yusuf_Jawed_Resume.pdf?v=2" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-doc"/></svg>Resume</a>
+      <a class="btn btn-sm head-cta" href="assets/Md_Yusuf_Jawed_Resume.pdf?v=3" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-doc"/></svg>Resume</a>
     </div>
   </div>
 </header>
@@ -394,7 +434,7 @@ ul{list-style:none}
           </p>
           <div class="h-actions">
             <a class="btn btn-primary" href="#work">See the work</a>
-            <a class="btn" href="assets/Md_Yusuf_Jawed_Resume.pdf?v=2" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-doc"/></svg>Resume</a>
+            <a class="btn" href="assets/Md_Yusuf_Jawed_Resume.pdf?v=3" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-doc"/></svg>Resume</a>
             <a class="btn" href="https://github.com/Yusuf-469" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
             <a class="btn" href="https://www.linkedin.com/in/yusuf-jawed-a13201351" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-linkedin"/></svg>LinkedIn</a>
           </div>
@@ -407,8 +447,9 @@ ul{list-style:none}
   <section class="section" id="approach" aria-labelledby="approach-title">
     <div class="wrap">
       <div class="sec-head">
+        <span class="sec-num rv" aria-hidden="true">01</span>
         <p class="sec-label mono rv"><b>01</b>Approach</p>
-        <h2 class="sec-title rv" id="approach-title">How I work</h2>
+        <h2 class="sec-title rv" id="approach-title"><span class="st">How I work</span></h2>
         <p class="sec-intro rv">I start from the friction in a workflow, test AI options against it, build something simple, put it online and write down why I made each choice. Each step links to a project where I did it.</p>
       </div>
       <div class="cards">
@@ -439,7 +480,7 @@ ul{list-style:none}
         <a class="card rv" href="#dapprush">
           <span class="num mono">05</span>
           <h3>Work with non-engineers</h3>
-          <p>Six months of remote client work for a studio in Dubai: their own site plus 3+ portfolio and client sites, applying client feedback and handling domain setup.</p>
+          <p>Six months of remote client work for a studio in Dubai: their own site plus 3+ client websites and web apps with Firebase integration, applying client feedback and handling domain setup.</p>
           <span class="see mono"><span class="arrow" aria-hidden="true">→</span>DAPPRUSH Studios</span>
         </a>
         <a class="card rv" href="#neuro">
@@ -455,8 +496,9 @@ ul{list-style:none}
   <section class="section" id="stack" aria-labelledby="stack-title">
     <div class="wrap">
       <div class="sec-head">
+        <span class="sec-num rv" aria-hidden="true">02</span>
         <p class="sec-label mono rv"><b>02</b>Stack</p>
-        <h2 class="sec-title rv" id="stack-title">Stack and skills</h2>
+        <h2 class="sec-title rv" id="stack-title"><span class="st">Stack and skills</span></h2>
         <p class="sec-intro rv">The languages, frameworks and tools I have used in the projects and internship on this page, grouped by where they sit in a system.</p>
       </div>
       <div class="stack">
@@ -471,15 +513,49 @@ ul{list-style:none}
         <div class="sg rv"><h3 class="sg-label mono">Working with people</h3><ul class="tiles"><li class="tile cpt" style="--t:0">Client communication</li><li class="tile cpt" style="--t:1">Remote collaboration</li><li class="tile cpt" style="--t:2">Presentations</li><li class="tile cpt" style="--t:3">Documentation and reporting</li><li class="tile cpt" style="--t:4">Interpersonal skills</li></ul></div>
         <div class="sg rv"><h3 class="sg-label mono">Spoken</h3><ul class="tiles"><li class="tile cpt" style="--t:0">English · professional</li><li class="tile cpt" style="--t:1">Hindi · native</li><li class="tile cpt" style="--t:2">Urdu · limited working</li><li class="tile cpt" style="--t:3">German · elementary</li><li class="tile cpt" style="--t:4">Korean · elementary</li></ul></div>
       </div>
-      <p class="stack-key rv"><span class="k-nl">No official logo</span><span class="k-cpt">Method or skill, not a tool</span></p>
+    </div>
+  </section>
+
+  <section class="section" id="education" aria-labelledby="education-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num rv" aria-hidden="true">03</span>
+        <p class="sec-label mono rv"><b>03</b>Education</p>
+        <h2 class="sec-title rv" id="education-title"><span class="st">Education</span></h2>
+      </div>
+      <div class="edu">
+        <article class="edu-card rv">
+          <div class="edu-logo"><img src="assets/logos/srm.webp" width="240" height="240" alt="SRM Institute of Science and Technology seal" loading="lazy"></div>
+          <p class="edu-tag mono">Undergraduate · Expected 2027</p>
+          <h3 class="edu-name">SRM Institute of Science and Technology</h3>
+          <p class="edu-what">B.Tech, Computer Science and Engineering (AI &amp; ML)</p>
+          <p class="edu-where mono">Kattankulathur, Tamil Nadu</p>
+          <ul class="mini edu-core" aria-label="Core coursework"><li class="tile cpt">Data structures and algorithms</li><li class="tile cpt">OOP</li><li class="tile cpt">DBMS</li><li class="tile cpt">Operating systems</li><li class="tile cpt">Computer networks</li></ul>
+        </article>
+        <article class="edu-card rv">
+          <div class="edu-logo edu-mono" aria-hidden="true">PS</div>
+          <p class="edu-tag mono">Class XII · 2022</p>
+          <h3 class="edu-name">Prakritik School</h3>
+          <p class="edu-what">Senior Secondary, CBSE · Physics, Chemistry, Biology, Mathematics</p>
+          <p class="edu-where mono">Patna, Bihar</p>
+        </article>
+        <article class="edu-card rv">
+          <div class="edu-logo"><img src="assets/logos/dps-patna.webp" width="240" height="240" alt="Delhi Public School crest" loading="lazy"></div>
+          <p class="edu-tag mono">Class X · 2020</p>
+          <h3 class="edu-name">Delhi Public School, Patna</h3>
+          <p class="edu-what">Secondary, CBSE · Physics, Chemistry, Biology, Mathematics</p>
+          <p class="edu-where mono">Patna, Bihar</p>
+        </article>
+      </div>
     </div>
   </section>
 
   <section class="section" id="experience" aria-labelledby="experience-title">
     <div class="wrap">
       <div class="sec-head">
-        <p class="sec-label mono rv"><b>03</b>Experience</p>
-        <h2 class="sec-title rv" id="experience-title">Experience</h2>
+        <span class="sec-num rv" aria-hidden="true">04</span>
+        <p class="sec-label mono rv"><b>04</b>Experience</p>
+        <h2 class="sec-title rv" id="experience-title"><span class="st">Experience</span></h2>
       </div>
       <div class="sheets">
         <article class="sheet" id="dapprush">
@@ -487,27 +563,15 @@ ul{list-style:none}
           <div class="sheet-body">
             <h3 class="sheet-title rv">DAPPRUSH Studios</h3>
             <p class="sheet-role mono rv">Web Development Intern</p>
-            <p class="sheet-sum rv">Six months building and launching websites for a creative tech studio in Dubai, working directly with clients.</p>
-            <a class="pv rv" href="https://dapprushstudios.com" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">dapprushstudios.com</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/dapprush.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the DAPPRUSH Studios site: the Services section with a cinematic video card"></span></a>
+            <p class="sheet-sum rv">Six months building and launching complete websites and web apps for a creative tech studio in Dubai and its clients, working directly with clients.</p>
+            <a class="pv rv" href="https://dapprushstudios.com" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">dapprushstudios.com</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/dapprush.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the DAPPRUSH Studios site: the Services section with a cinematic video card"><video muted loop playsinline preload="none" data-src="assets/videos/dapprush.mp4" aria-hidden="true"></video></span></a>
             <dl class="rows">
-              <div class="rv"><dt>Problem</dt><dd>The studio needed its own site launched on a custom domain, and its clients needed sites too.</dd></div>
               <div class="rv"><dt>Built</dt><dd>The studio site in Framer, in a customised dark cinematic theme: a looping-video hero, seven service video cards, testimonials, an FAQ accordion, tickers, a contact section and a scrolling gallery. Scroll-reveal, hover and looping animations adapted from code snippets (triggers, timing, styling, mobile fixes), plus background audio.</dd></div>
-              <div class="rv"><dt>Result</dt><dd>The studio site is live on its custom domain. 3+ more portfolio and client sites in the same six months, each responsive, with client feedback applied and domain setup handled.</dd></div>
-              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-framer"/></svg>Framer</li></ul></dd></div>
+              <div class="rv"><dt>Client work</dt><dd>3+ more portfolio and client websites and web apps in the same six months, with Firebase integration, each responsive, with client feedback applied and domain setup handled.</dd></div>
+              <div class="rv"><dt>Result</dt><dd>The studio site is live on its custom domain.</dd></div>
+              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-framer"/></svg>Framer</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-html"/></svg>HTML5</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-css"/></svg>CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-javascript"/></svg>JavaScript</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-firebase"/></svg>Firebase</li></ul></dd></div>
             </dl>
             <div class="sheet-links rv"><a class="lnk" href="https://dapprushstudios.com" target="_blank" rel="noopener">dapprushstudios.com<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
-          </div>
-        </article>
-
-        <article class="sheet" id="education">
-          <div class="sheet-label rv rv-left"><span class="tag mono">Education</span><span class="date mono">Expected 2027</span></div>
-          <div class="sheet-body">
-            <h3 class="sheet-title rv">SRM Institute of Science and Technology</h3>
-            <p class="sheet-sum rv">B.Tech, Computer Science and Engineering (AI &amp; ML), Kattankulathur, Tamil Nadu.</p>
-            <dl class="rows">
-              <div class="rv"><dt>Core</dt><dd>Data structures and algorithms, object-oriented programming, database management systems, operating systems, computer networks.</dd></div>
-              <div class="rv"><dt>School</dt><dd>Class XII (CBSE, PCBM), Prakritik School, Patna, 2022. Class X (CBSE, PCBM), DPS Patna, 2020.</dd></div>
-            </dl>
           </div>
         </article>
       </div>
@@ -517,9 +581,9 @@ ul{list-style:none}
   <section class="section" id="work" aria-labelledby="work-title">
     <div class="wrap">
       <div class="sec-head">
-        <p class="sec-label mono rv"><b>04</b>Work</p>
-        <h2 class="sec-title rv" id="work-title">Selected work</h2>
-        <p class="sec-intro rv">Personal and academic projects, each labelled as such. Numbers are shown with the size of the set they came from. Previews are screenshots of the live builds; select one to open it.</p>
+        <span class="sec-num rv" aria-hidden="true">05</span>
+        <p class="sec-label mono rv"><b>05</b>Work</p>
+        <h2 class="sec-title rv" id="work-title"><span class="st">Selected work</span></h2>
       </div>
       <div class="filters rv" role="group" aria-label="Filter projects">
         <span class="mono lbl" aria-hidden="true">Filter</span>
@@ -528,97 +592,42 @@ ul{list-style:none}
         <button class="chip" type="button" data-filter="web" aria-pressed="false">Web &amp; 3D</button>
         <button class="chip" type="button" data-filter="hw" aria-pressed="false">Hardware</button>
       </div>
-
-      <div class="sheets" id="projects">
-        <article class="sheet" id="meddoc" data-cat="ai">
-          <div class="sheet-label rv rv-left"><span class="tag mono">Personal · solo</span><span class="date mono">Oct 2026</span></div>
-          <div class="sheet-body">
-            <h3 class="sheet-title rv">MedDoc RAG</h3>
-            <p class="sheet-sum rv">Citation-grounded question answering over 8 WHO, CDC and NIH guidelines, 1,077 pages in total.</p>
-            <a class="pv rv" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">medicrag.streamlit.app</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/meddoc.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the MedDoc RAG app: example questions in a sidebar and a question box for the guidelines"></span></a>
-            <dl class="rows">
-              <div class="rv"><dt>Problem</dt><dd>An answer pulled from a long guideline is only useful if each claim can be traced to its source, and if the system refuses questions the documents do not cover.</dd></div>
-              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Shipped pipeline"><li>8 PDFs</li><li>Section-aware chunks</li><li>bge-small + FAISS</li><li>Cross-encoder rerank</li><li>Grounded LLM</li><li>Citation check</li><li>FastAPI</li></ol></dd></div>
-              <div class="rv"><dt>Built</dt><dd>PyMuPDF parsing, section-aware chunking, bge-small embeddings with FAISS and cross-encoder reranking, feeding a grounded LLM answer that is checked against its citations. Served with FastAPI and Streamlit, packaged with Docker, with pytest and GitHub Actions CI. Built on pretrained models.</dd></div>
-              <div class="rv"><dt>Safety</dt><dd>A relevance gate that refuses out-of-scope questions, citation validation, a prompt-injection classifier, output validation, and red-teaming.</dd></div>
-              <div class="rv"><dt>Tested</dt><dd>3 chunking strategies against 5 retrievers, including BM25 with Reciprocal Rank Fusion, on a 48-question golden set I wrote and checked. Scored with Hit@k, MRR and paired bootstrap confidence intervals. Section-aware chunking won. Adding BM25 to dense search showed no significant gain, so I shipped the simpler pipeline.</dd></div>
-              <div class="rv"><dt>Result</dt><dd><strong>95.8% Hit@5</strong> and <strong>0.741 MRR</strong> on that 48-question set. <strong>44 of 48</strong> answers correct in my manual audit. <strong>11 of 11</strong> out-of-scope questions refused. <strong>0</strong> citations to sources the model was not given.</dd></div>
-              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile nl">PyMuPDF</li><li class="tile nl">FAISS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-streamlit"/></svg>Streamlit</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pytest"/></svg>pytest</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-gha"/></svg>GitHub Actions</li></ul></dd></div>
-            </dl>
-            <figure class="chart rv" id="hit5">
-              <figcaption><span class="mono">Hit@5 by chunking strategy · n = 48 questions</span><strong>Section-aware chunking retrieved the right passage most often</strong></figcaption>
-              <svg role="img" aria-label="Bar chart, Hit@5 on 48 questions: fixed-size 83.3%, recursive 89.6%, section-aware 95.8%."></svg>
-            </figure>
-            <p class="sheet-note rv">One question is 2.1 points on a 48-question set. The models are pretrained. Educational project, not medical advice.</p>
-            <div class="sheet-links rv"><a class="lnk" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener">medicrag.streamlit.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><a class="lnk" href="https://github.com/Yusuf-469/RAG" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>github.com/Yusuf-469/RAG<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><span class="lnk-note">The demo is hosted on Streamlit Community Cloud and may take a few seconds to wake up.</span></div>
-          </div>
+      <div class="projects" id="projects">
+        <article class="proj rv" id="meddoc" data-cat="ai">
+          <a class="pv" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">medicrag.streamlit.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/meddoc.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the MedDoc RAG app: example questions in a sidebar and a question box for the guidelines"><video muted loop playsinline preload="none" data-src="assets/videos/meddoc.mp4" aria-hidden="true"></video></span></a>
+          <div class="proj-head"><p class="proj-tag mono">Personal · solo · Oct 2026</p><h3 class="proj-title">MedDoc RAG</h3></div>
+          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile nl">PyMuPDF</li><li class="tile nl">FAISS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-streamlit"/></svg>Streamlit</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pytest"/></svg>pytest</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-gha"/></svg>GitHub Actions</li></ul>
+          <div class="sheet-links"><a class="lnk" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener">medicrag.streamlit.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><a class="lnk" href="https://github.com/Yusuf-469/RAG" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>github.com/Yusuf-469/RAG<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
         </article>
-
-        <article class="sheet" id="healix" data-cat="ai web">
-          <div class="sheet-label rv rv-left"><span class="tag mono">Personal</span></div>
-          <div class="sheet-body">
-            <h3 class="sheet-title rv">Healix</h3>
-            <p class="sheet-sum rv">An AI-assisted healthcare dashboard with five interactive 3D models, in the browser.</p>
-            <a class="pv rv" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">devops-zeta-nine.vercel.app</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healix.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Healix landing page with its brain-and-circuit logo"></span></a>
-            <dl class="rows">
-              <div class="rv"><dt>Problem</dt><dd>An AI feature in a browser app needs an API key, and that key must never reach the browser.</dd></div>
-              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Interface flow"><li>React UI</li><li>Zustand</li><li>React Three Fiber, 5 GLB models</li></ol><ol class="flow" aria-label="AI request flow"><li>AI request</li><li>Vercel serverless function</li><li>OpenRouter</li></ol></dd></div>
-              <div class="rv"><dt>Built</dt><dd>A responsive React, Vite and Tailwind CSS dashboard with five interactive 3D models in Three.js and React Three Fiber, lazy-loaded so each view only loads when opened. State and routing with Zustand and React Router. LLM chat and report summaries go through OpenRouter via Vercel serverless functions, so the key stays server-side. A separate Jenkins CI/CD pipeline on AWS EC2 builds a Docker image.</dd></div>
-              <div class="rv"><dt>Result</dt><dd>A deployed demo anyone can open.</dd></div>
-              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-react"/></svg>React</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vite"/></svg>Vite</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-tailwind"/></svg>Tailwind CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-three"/></svg>Three.js</li><li class="tile nl">React Three Fiber</li><li class="tile nl">Zustand</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-router"/></svg>React Router</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-openrouter"/></svg>OpenRouter</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jenkins"/></svg>Jenkins</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-aws"/></svg>AWS EC2</li></ul></dd></div>
-            </dl>
-            <div class="sheet-links rv"><a class="lnk" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener">devops-zeta-nine.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
-          </div>
+        <article class="proj rv" id="healix" data-cat="ai web">
+          <a class="pv" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">devops-zeta-nine.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healix.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Healix landing page with its brain-and-circuit logo"><video muted loop playsinline preload="none" data-src="assets/videos/healix.mp4" aria-hidden="true"></video></span></a>
+          <div class="proj-head"><p class="proj-tag mono">Personal</p><h3 class="proj-title">Healix</h3></div>
+          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-react"/></svg>React</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vite"/></svg>Vite</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-tailwind"/></svg>Tailwind CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-three"/></svg>Three.js</li><li class="tile nl">React Three Fiber</li><li class="tile nl">Zustand</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-router"/></svg>React Router</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-openrouter"/></svg>OpenRouter</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jenkins"/></svg>Jenkins</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-aws"/></svg>AWS EC2</li></ul>
+          <div class="sheet-links"><a class="lnk" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener">devops-zeta-nine.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
         </article>
-
-        <article class="sheet" id="healthmonitor" data-cat="hw web">
-          <div class="sheet-label rv rv-left"><span class="tag mono">Academic</span></div>
-          <div class="sheet-body">
-            <h3 class="sheet-title rv">HealthMonitor</h3>
-            <p class="sheet-sum rv">Vital-sign readings from an ESP32 to a web dashboard, with an alert engine based on NEWS2.</p>
-            <a class="pv rv" href="https://final-iot-delta.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">final-iot-delta.vercel.app</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healthmonitor.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the HealthMonitor landing page with a vital-signs dashboard card"></span></a>
-            <dl class="rows">
-              <div class="rv"><dt>Problem</dt><dd>Turn raw pulse, oxygen and temperature readings into alerts a person can read, instead of a stream of numbers.</dd></div>
-              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Data flow"><li>MAX30102 + DS18B20</li><li>ESP32</li><li>Wi-Fi</li><li>Firebase RTDB</li><li>Alert worker</li><li>Express API</li><li>Dashboard</li></ol></dd></div>
-              <div class="rv"><dt>Built</dt><dd>ESP32 firmware in Embedded C/C++ reading a MAX30102 (heart rate, SpO2) and a DS18B20 (temperature) into Firebase Realtime Database. An alert engine with NEWS2 scoring, adaptive per-patient baselines (z-score), escalation and a clinician-feedback step. A Node.js/Express REST API on Vercel secured with JWT, Helmet, rate-limited login, Firebase Auth and device API keys. A live Chart.js dashboard.</dd></div>
-              <div class="rv"><dt>Tested</dt><dd>40 Jest tests.</dd></div>
-              <div class="rv"><dt>Result</dt><dd>Dashboard deployed on Vercel.</dd></div>
-              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-esp"/></svg>ESP32</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-cpp"/></svg>Embedded C/C++</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-firebase"/></svg>Firebase</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-node"/></svg>Node.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-express"/></svg>Express</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jwt"/></svg>JWT</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jest"/></svg>Jest</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-chartjs"/></svg>Chart.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul></dd></div>
-            </dl>
-            <p class="sheet-note rv">Academic project. Not a medical device.</p>
-            <div class="sheet-links rv"><a class="lnk" href="https://final-iot-delta.vercel.app" target="_blank" rel="noopener">final-iot-delta.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
-          </div>
+        <article class="proj rv" id="healthmonitor" data-cat="hw web">
+          <a class="pv" href="https://final-iot-delta.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">final-iot-delta.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healthmonitor.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the HealthMonitor landing page with a vital-signs dashboard card"><video muted loop playsinline preload="none" data-src="assets/videos/healthmonitor.mp4" aria-hidden="true"></video></span></a>
+          <div class="proj-head"><p class="proj-tag mono">Academic</p><h3 class="proj-title">HealthMonitor</h3></div>
+          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-esp"/></svg>ESP32</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-cpp"/></svg>Embedded C/C++</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-firebase"/></svg>Firebase</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-node"/></svg>Node.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-express"/></svg>Express</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jwt"/></svg>JWT</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jest"/></svg>Jest</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-chartjs"/></svg>Chart.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul>
+          <div class="sheet-links"><a class="lnk" href="https://final-iot-delta.vercel.app" target="_blank" rel="noopener">final-iot-delta.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
         </article>
-
-        <article class="sheet" id="neuro" data-cat="ai">
-          <div class="sheet-label rv rv-left"><span class="tag mono">Academic</span></div>
-          <div class="sheet-body">
-            <h3 class="sheet-title rv">Neuro</h3>
-            <p class="sheet-sum rv">An end-to-end ML pipeline that classifies healthy and mood-disorder subjects from EEG band-power features, with SHAP explanations and a FastAPI service.</p>
-            <dl class="rows">
-              <div class="rv"><dt>Problem</dt><dd>Classify mood disorders from EEG data on a small dataset (n = 361), and check the model beats the simplest possible guess.</dd></div>
-              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Pipeline"><li>EEG features</li><li>Feature engineering</li><li>StandardScaler</li><li>PCA</li><li>SMOTE</li><li>9 ML/DL models</li><li>5-fold CV + test</li><li>SHAP</li><li>FastAPI</li></ol></dd></div>
-              <div class="rv"><dt>Built</dt><dd>Imputation, StandardScaler, PCA and SMOTE (applied to training data only), plus engineered FAA and theta/alpha biomarkers. XGBoost and LightGBM among the models, SHAP for explanations and FastAPI for serving.</dd></div>
-              <div class="rv"><dt>Tested</dt><dd>7 ML and 2 deep learning models (ANN, CNN-LSTM) compared with stratified 5-fold cross-validation, then on 73 held-out samples against a majority-class baseline of 73.7%.</dd></div>
-              <div class="rv"><dt>Result</dt><dd>XGBoost and the voting ensemble reached <strong>80.82%</strong> test accuracy against the <strong>73.7%</strong> baseline, on 73 held-out samples. At that size there is about 9 points of uncertainty.</dd></div>
-              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pandas"/></svg>Pandas</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-numpy"/></svg>NumPy</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-sklearn"/></svg>scikit-learn</li><li class="tile nl">XGBoost</li><li class="tile nl">LightGBM</li><li class="tile nl">SHAP</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li></ul></dd></div>
-            </dl>
-            <p class="sheet-note rv">Academic project. Not a diagnostic tool.</p>
-          </div>
+        <article class="proj rv" id="neuro" data-cat="ai">
+          <a class="pv" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neuro-rose.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neuro.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Neuro landing page, headed Your mind. Finally visible."><video muted loop playsinline preload="none" data-src="assets/videos/neuro.mp4" aria-hidden="true"></video></span></a>
+          <div class="proj-head"><p class="proj-tag mono">Academic</p><h3 class="proj-title">Neuro</h3></div>
+          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pandas"/></svg>Pandas</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-numpy"/></svg>NumPy</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-sklearn"/></svg>scikit-learn</li><li class="tile nl">XGBoost</li><li class="tile nl">LightGBM</li><li class="tile nl">SHAP</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul>
+          <div class="sheet-links"><a class="lnk" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener">neuro-rose.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
         </article>
-
-        <article class="sheet" id="small-apps" data-cat="web">
-          <div class="sheet-label rv rv-left"><span class="tag mono">Personal</span></div>
-          <div class="sheet-body">
-            <h3 class="sheet-title rv">Silent Stress and Expensi</h3>
-            <p class="sheet-sum rv">Two small web apps, both deployed on Vercel.</p>
-            <div class="pv-pair"><a class="pv rv" href="https://secret-stress.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">secret-stress.vercel.app</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/silentstress.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Silent Stress home page with an anonymous sign-in form"></span></a><a class="pv rv" href="https://expensi.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">expensi.vercel.app</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/expensi.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Expensi landing page, headed Split bills without the drama"></span></a></div>
-            <dl class="rows">
-              <div class="rv"><dt>Silent Stress</dt><dd class="stk">An anonymous platform for reporting academic stress.<ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-next"/></svg>Next.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-tailwind"/></svg>Tailwind CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul></dd></div>
-              <div class="rv"><dt>Expensi</dt><dd class="stk">A bill-splitting and shared-expense tracker.<ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-html"/></svg>HTML5</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-css"/></svg>CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-javascript"/></svg>JavaScript</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul></dd></div>
-            </dl>
-            <div class="sheet-links rv"><a class="lnk" href="https://secret-stress.vercel.app" target="_blank" rel="noopener">secret-stress.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><a class="lnk" href="https://expensi.vercel.app" target="_blank" rel="noopener">expensi.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
-          </div>
+        <article class="proj rv" id="silentstress" data-cat="web">
+          <a class="pv" href="https://secret-stress.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">secret-stress.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/silentstress.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Silent Stress home page with an anonymous sign-in form"><video muted loop playsinline preload="none" data-src="assets/videos/silentstress.mp4" aria-hidden="true"></video></span></a>
+          <div class="proj-head"><p class="proj-tag mono">Personal</p><h3 class="proj-title">Silent Stress</h3></div>
+          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-next"/></svg>Next.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-tailwind"/></svg>Tailwind CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul>
+          <div class="sheet-links"><a class="lnk" href="https://secret-stress.vercel.app" target="_blank" rel="noopener">secret-stress.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+        </article>
+        <article class="proj rv" id="expensi" data-cat="web">
+          <a class="pv" href="https://expensi.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">expensi.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/expensi.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Expensi landing page, headed Split bills without the drama"><video muted loop playsinline preload="none" data-src="assets/videos/expensi.mp4" aria-hidden="true"></video></span></a>
+          <div class="proj-head"><p class="proj-tag mono">Personal</p><h3 class="proj-title">Expensi</h3></div>
+          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-html"/></svg>HTML5</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-css"/></svg>CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-javascript"/></svg>JavaScript</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul>
+          <div class="sheet-links"><a class="lnk" href="https://expensi.vercel.app" target="_blank" rel="noopener">expensi.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
         </article>
       </div>
     </div>
@@ -627,8 +636,9 @@ ul{list-style:none}
   <section class="section" id="contact" aria-labelledby="contact-title">
     <div class="wrap">
       <div class="sec-head">
-        <p class="sec-label mono rv"><b>05</b>Contact</p>
-        <h2 class="sec-title rv" id="contact-title">Contact</h2>
+        <span class="sec-num rv" aria-hidden="true">06</span>
+        <p class="sec-label mono rv"><b>06</b>Contact</p>
+        <h2 class="sec-title rv" id="contact-title"><span class="st">Contact</span></h2>
       </div>
       <p class="contact-line rv">I am looking for a role where I can build practical AI tools and keep learning from the people who use them every day.</p>
       <div class="contact-email rv">
@@ -639,7 +649,7 @@ ul{list-style:none}
         </span>
       </div>
       <div class="contact-links rv">
-        <a class="btn btn-primary" href="assets/Md_Yusuf_Jawed_Resume.pdf?v=2" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-doc"/></svg>Resume</a>
+        <a class="btn btn-primary" href="assets/Md_Yusuf_Jawed_Resume.pdf?v=3" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-doc"/></svg>Resume</a>
         <a class="btn" href="https://www.linkedin.com/in/yusuf-jawed-a13201351" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-linkedin"/></svg>LinkedIn</a>
         <a class="btn" href="https://github.com/Yusuf-469" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
       </div>
@@ -771,7 +781,7 @@ ul{list-style:none}
   }
 
   /* filters (projects only) */
-  var chips=$$('.chip'),projects=$$('#projects .sheet');
+  var chips=$$('.chip'),projects=$$('#projects .proj');
   function applyFilter(f){
     chips.forEach(function(c){c.setAttribute('aria-pressed',String(c.dataset.filter===f))});
     projects.forEach(function(s){
@@ -782,7 +792,7 @@ ul{list-style:none}
     });
   }
   chips.forEach(function(c){c.addEventListener('click',function(){applyFilter(c.dataset.filter)})});
-  $$('.sheet').forEach(function(s){s.addEventListener('animationend',function(e){if(e.animationName==='fltIn')s.classList.remove('flt');if(e.animationName==='flash')s.classList.remove('flash')})});
+  $$('.sheet,.proj').forEach(function(s){s.addEventListener('animationend',function(e){if(e.animationName==='fltIn')s.classList.remove('flt');if(e.animationName==='flash')s.classList.remove('flash')})});
 
   /* "How I work" cards jump to their project */
   $$('.card').forEach(function(card){
@@ -807,7 +817,7 @@ ul{list-style:none}
     });
   }
   if('IntersectionObserver' in window){
-    var spyIds=['top','approach','stack','experience','work','contact'],inBand={};
+    var spyIds=['top','approach','stack','education','experience','work','contact'],inBand={};
     var spy=new IntersectionObserver(function(es){
       es.forEach(function(e){inBand[e.target.id]=e.isIntersecting});
       var cur=null;
@@ -832,7 +842,34 @@ ul{list-style:none}
     else fallback();
   });
 
-  /* circuit background: traces, chips and pulses of current */
+  /* live previews: video plays on hover (or when in view on touch screens) */
+  var finePtr=matchMedia('(hover:hover) and (pointer:fine)').matches;
+  function vidOf(pv){return pv.querySelector('video')}
+  function startVid(pv){
+    var v=vidOf(pv);if(!v)return;
+    if(!v.getAttribute('src')){v.src=v.dataset.src}
+    var p=v.play();if(p&&p.catch)p.catch(function(){});
+  }
+  function stopVid(pv){
+    var v=vidOf(pv);if(!v)return;
+    pv.classList.remove('playing');v.pause();
+  }
+  $$('.pv').forEach(function(pv){
+    var v=vidOf(pv);if(!v)return;
+    v.addEventListener('playing',function(){pv.classList.add('playing')});
+    if(finePtr){
+      pv.addEventListener('pointerenter',function(){startVid(pv)});
+      pv.addEventListener('pointerleave',function(){stopVid(pv);setTimeout(function(){if(!pv.classList.contains('playing'))try{v.currentTime=0}catch(e){}},450)});
+      pv.addEventListener('focus',function(){startVid(pv)});
+      pv.addEventListener('blur',function(){stopVid(pv)});
+    }
+  });
+  if(!finePtr&&'IntersectionObserver' in window){
+    var vio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)startVid(e.target);else stopVid(e.target)})},{threshold:.65});
+    $$('.pv').forEach(function(pv){if(vidOf(pv))vio.observe(pv)});
+  }
+
+  /* circuit background: faint traces with pulses of current */
   var cv=document.getElementById('circuit'),ctx=cv&&cv.getContext&&cv.getContext('2d');
   if(ctx){
     var dark=matchMedia('(prefers-color-scheme: dark)');
@@ -845,18 +882,18 @@ ul{list-style:none}
       if(hx.length===3)hx=hx.replace(/./g,'$&$&');
       var n=parseInt(hx,16);col.acc=[(n>>16)&255,(n>>8)&255,n&255];
       col.ink=dark.matches?[227,232,235]:[20,25,29];
-      col.trace=rgba(col.ink,dark.matches?.075:.09);
+      col.trace=rgba(col.ink,dark.matches?.06:.07);
       col.chip=rgba(col.ink,dark.matches?.13:.15);
       col.comp=dark.matches?'lighter':'source-over';
       glow=document.createElement('canvas');glow.width=glow.height=48;
       var g=glow.getContext('2d'),gr=g.createRadialGradient(24,24,0,24,24,24);
-      gr.addColorStop(0,rgba(col.acc,dark.matches?.95:.75));gr.addColorStop(.25,rgba(col.acc,dark.matches?.45:.3));gr.addColorStop(1,rgba(col.acc,0));
+      gr.addColorStop(0,rgba(col.acc,dark.matches?.7:.55));gr.addColorStop(.25,rgba(col.acc,dark.matches?.28:.2));gr.addColorStop(1,rgba(col.acc,0));
       g.fillStyle=gr;g.fillRect(0,0,48,48);
     }
     function build(){
       W=window.innerWidth;H=window.innerHeight;dpr=Math.min(window.devicePixelRatio||1,2);
       cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
-      G=W<600?20:24;maxP=W<600?9:18;
+      G=W<600?22:26;maxP=W<600?5:10;
       var cols=Math.ceil(W/G)+1,rows=Math.ceil(H/G)+1,occ=new Uint8Array(cols*rows);
       var free=function(c,r){return c>=0&&r>=0&&c<cols&&r<rows&&!occ[r*cols+c]};
       var mark=function(c,r){if(c>=0&&r>=0&&c<cols&&r<rows)occ[r*cols+c]=1};
@@ -880,7 +917,7 @@ ul{list-style:none}
         }
         traces.push({px:px,s:samp,n:samp.length/2,chip:chip,end:px[px.length-1]});
       }
-      var nChips=W<600?2:4;
+      var nChips=0;
       for(var k=0,tries=0;k<nChips&&tries<80;tries++){
         var cw=Math.round(rnd(3,6)),ch=Math.round(rnd(2,4)),c0=Math.floor(rnd(2,cols-cw-3)),r0=Math.floor(rnd(3,rows-ch-3)),ok=true;
         for(var r=r0-2;r<=r0+ch+2&&ok;r++)for(var c=c0-2;c<=c0+cw+2;c++)if(!free(c,r)){ok=false;break}
@@ -896,7 +933,7 @@ ul{list-style:none}
           if(Math.random()<.7)grow(c0+cw+1,r,0,chip,[chip.x+chip.w,r*G+G/2]);
         }
       }
-      var target=Math.round(cols*rows/(W<600?40:30));
+      var target=Math.round(cols*rows/(W<600?70:58));
       for(var t=0,att=0;t<target&&att<target*12;att++){
         var sc=Math.floor(rnd(0,cols)),sr=Math.floor(rnd(0,rows));
         if(!free(sc,sr))continue;
@@ -950,8 +987,8 @@ ul{list-style:none}
       ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);
       ctx.drawImage(layer,0,0);
       ctx.setTransform(dpr,0,0,dpr,0,0);
-      if(pulses.length<maxP&&Math.random()<dt*7)spawn();
-      if(Math.random()<dt*1.4&&traces.length){var tw=traces[Math.floor(Math.random()*traces.length)];sparks.push({x:tw.end[0],y:tw.end[1],a:1,r:5})}
+      if(pulses.length<maxP&&Math.random()<dt*3)spawn();
+      if(Math.random()<dt*.35&&traces.length){var tw=traces[Math.floor(Math.random()*traces.length)];sparks.push({x:tw.end[0],y:tw.end[1],a:1,r:5})}
       ctx.globalCompositeOperation=col.comp;ctx.lineCap='round';ctx.lineJoin='round';
       for(var i=pulses.length-1;i>=0;i--){
         var P=pulses[i],tr=P.t;P.p+=P.v*dt/2;
@@ -971,7 +1008,7 @@ ul{list-style:none}
           ctx.beginPath();ctx.moveTo(pa[0],pa[1]);
           for(var q=Math.min(a,tr.n-1);q>Math.max(b,0);q-=3){var pq=at(tr,q,P.inward);ctx.lineTo(pq[0],pq[1])}
           var pb=at(tr,Math.max(b,0),P.inward);ctx.lineTo(pb[0],pb[1]);
-          ctx.strokeStyle=rgba(col.acc,(1-k/CH)*.85);ctx.lineWidth=1.8-k*.18;ctx.stroke();
+          ctx.strokeStyle=rgba(col.acc,(1-k/CH)*.6);ctx.lineWidth=1.5-k*.15;ctx.stroke();
         }
         if(head<tr.n){var h=at(tr,head,P.inward);ctx.drawImage(glow,h[0]-12,h[1]-12,24,24)}
         ctx.globalAlpha=1;
@@ -1008,7 +1045,7 @@ ul{list-style:none}
     });
     /* current follows the cursor: nearby traces fire */
     addEventListener('pointermove',function(e){
-      var now=performance.now();if(now-lastPtr<180||pulses.length>maxP+8)return;lastPtr=now;
+      var now=performance.now();if(now-lastPtr<400||pulses.length>maxP+3)return;lastPtr=now;
       var best=null,bd=130*130;
       for(var i=0;i<traces.length;i++){var tr=traces[i];for(var j=0;j<tr.px.length;j+=2){var dx=tr.px[j][0]-e.clientX,dy=tr.px[j][1]-e.clientY,d=dx*dx+dy*dy;if(d<bd){bd=d;best=tr}}}
       if(best)spawn(best);
