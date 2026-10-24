@@ -258,15 +258,21 @@ ul{list-style:none}
 .edu-where{color:var(--muted)}
 .edu-core{padding-top:6px}
 
-/* project cards */
-.projects{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:28px 24px}
-.proj{display:flex;flex-direction:column;gap:14px;min-width:0}
-.proj .pv{max-width:none}
-.proj-head{display:flex;flex-direction:column;gap:4px}
-.proj-tag{color:var(--accent)}
-.proj-title{font:700 clamp(24px,1.2vw + 18px,30px)/1.05 var(--f-display);letter-spacing:-.03em}
-.proj.flash{animation:flash 1.6s ease-out .45s backwards}
-.proj.flt{animation:fltIn .45s var(--ease)}
+/* selected work: tiny glance grid, 3 across */
+.glance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 12px;max-width:620px}
+.gl{display:flex;flex-direction:column;gap:5px;min-width:0}
+.gl .pv{max-width:none}
+.gl .pv-bar{display:none}
+.gl .pv-img::after{content:"\25B6";position:absolute;right:5px;bottom:5px;width:16px;height:16px;display:grid;place-items:center;font-size:7px;color:#fff;background:rgba(10,14,16,.6);border-radius:50%;transition:opacity .3s}
+.gl .pv.playing .pv-img::after{opacity:0}
+.gl-title{font:700 14px/1.2 var(--f-display);letter-spacing:-.01em}
+.gl-title a{text-decoration:none;transition:color .2s}
+.gl-title a:hover{color:var(--accent)}
+.gl-tag{font-size:9.5px;letter-spacing:.06em;color:var(--accent)}
+.gl-stack{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px}
+.gl-stack .ic{width:14px;height:14px}
+.gl-stack .tx{font:500 9px/1 var(--f-mono);letter-spacing:.02em;color:var(--muted);border:1px solid var(--line);border-radius:2px;padding:2px 4px}
+@media (max-width:520px){.glance{gap:12px 8px}.gl-title{font-size:12.5px}.gl-tag{font-size:8.5px}.gl-stack .ic{width:12px;height:12px}}
 
 /* filters */
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -409,6 +415,7 @@ ul{list-style:none}
           <li class="opt"><a href="#education">Education</a></li>
           <li><a href="#experience">Experience</a></li>
           <li><a href="#work">Work</a></li>
+          <li class="opt"><a href="#projects">Projects</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
       </nav>
@@ -584,6 +591,56 @@ ul{list-style:none}
         <span class="sec-num rv" aria-hidden="true">05</span>
         <p class="sec-label mono rv"><b>05</b>Work</p>
         <h2 class="sec-title rv" id="work-title"><span class="st">Selected work</span></h2>
+        <p class="sec-intro rv">A quick look at every project and its stack. Hover a preview to see it running; the full write-ups follow in the next section.</p>
+      </div>
+      <div class="glance" id="glance">
+        <article class="gl rv" id="gl-meddoc">
+          <a class="pv" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">medicrag.streamlit.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/meddoc.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the MedDoc RAG app: example questions in a sidebar and a question box for the guidelines"><video muted loop playsinline preload="none" data-src="assets/videos/meddoc.mp4" aria-hidden="true"></video></span></a>
+          <h3 class="gl-title"><a href="#meddoc">MedDoc RAG</a></h3>
+          <p class="gl-tag mono">Personal · solo · Oct 2026</p>
+          <ul class="gl-stack" aria-label="Stack"><li title="Python"><svg class="ic" role="img" aria-label="Python"><use href="#i-python"/></svg></li><li class="tx">PyMuPDF</li><li class="tx">FAISS</li><li title="FastAPI"><svg class="ic" role="img" aria-label="FastAPI"><use href="#i-fastapi"/></svg></li><li title="Streamlit"><svg class="ic" role="img" aria-label="Streamlit"><use href="#i-streamlit"/></svg></li><li title="Docker"><svg class="ic" role="img" aria-label="Docker"><use href="#i-docker"/></svg></li><li title="pytest"><svg class="ic" role="img" aria-label="pytest"><use href="#i-pytest"/></svg></li><li title="GitHub Actions"><svg class="ic" role="img" aria-label="GitHub Actions"><use href="#i-gha"/></svg></li></ul>
+        </article>
+        <article class="gl rv" id="gl-healix">
+          <a class="pv" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">devops-zeta-nine.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healix.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Healix landing page with its brain-and-circuit logo"><video muted loop playsinline preload="none" data-src="assets/videos/healix.mp4" aria-hidden="true"></video></span></a>
+          <h3 class="gl-title"><a href="#healix">Healix</a></h3>
+          <p class="gl-tag mono">Personal</p>
+          <ul class="gl-stack" aria-label="Stack"><li title="React"><svg class="ic" role="img" aria-label="React"><use href="#i-react"/></svg></li><li title="Vite"><svg class="ic" role="img" aria-label="Vite"><use href="#i-vite"/></svg></li><li title="Tailwind CSS"><svg class="ic" role="img" aria-label="Tailwind CSS"><use href="#i-tailwind"/></svg></li><li title="Three.js"><svg class="ic" role="img" aria-label="Three.js"><use href="#i-three"/></svg></li><li class="tx">React Three Fiber</li><li class="tx">Zustand</li><li title="React Router"><svg class="ic" role="img" aria-label="React Router"><use href="#i-router"/></svg></li><li title="OpenRouter"><svg class="ic" role="img" aria-label="OpenRouter"><use href="#i-openrouter"/></svg></li><li title="Vercel"><svg class="ic" role="img" aria-label="Vercel"><use href="#i-vercel"/></svg></li><li title="Jenkins"><svg class="ic" role="img" aria-label="Jenkins"><use href="#i-jenkins"/></svg></li><li title="Docker"><svg class="ic" role="img" aria-label="Docker"><use href="#i-docker"/></svg></li><li title="AWS EC2"><svg class="ic" role="img" aria-label="AWS EC2"><use href="#i-aws"/></svg></li></ul>
+        </article>
+        <article class="gl rv" id="gl-healthmonitor">
+          <a class="pv" href="https://final-iot-delta.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">final-iot-delta.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healthmonitor.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the HealthMonitor landing page with a vital-signs dashboard card"><video muted loop playsinline preload="none" data-src="assets/videos/healthmonitor.mp4" aria-hidden="true"></video></span></a>
+          <h3 class="gl-title"><a href="#healthmonitor">HealthMonitor</a></h3>
+          <p class="gl-tag mono">Academic</p>
+          <ul class="gl-stack" aria-label="Stack"><li title="ESP32"><svg class="ic" role="img" aria-label="ESP32"><use href="#i-esp"/></svg></li><li title="Embedded C/C++"><svg class="ic" role="img" aria-label="Embedded C/C++"><use href="#i-cpp"/></svg></li><li title="Firebase"><svg class="ic" role="img" aria-label="Firebase"><use href="#i-firebase"/></svg></li><li title="Node.js"><svg class="ic" role="img" aria-label="Node.js"><use href="#i-node"/></svg></li><li title="Express"><svg class="ic" role="img" aria-label="Express"><use href="#i-express"/></svg></li><li title="JWT"><svg class="ic" role="img" aria-label="JWT"><use href="#i-jwt"/></svg></li><li title="Jest"><svg class="ic" role="img" aria-label="Jest"><use href="#i-jest"/></svg></li><li title="Chart.js"><svg class="ic" role="img" aria-label="Chart.js"><use href="#i-chartjs"/></svg></li><li title="Vercel"><svg class="ic" role="img" aria-label="Vercel"><use href="#i-vercel"/></svg></li></ul>
+        </article>
+        <article class="gl rv" id="gl-neuro">
+          <a class="pv" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neuro-rose.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neuro.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Neuro landing page, headed Your mind. Finally visible."><video muted loop playsinline preload="none" data-src="assets/videos/neuro.mp4" aria-hidden="true"></video></span></a>
+          <h3 class="gl-title"><a href="#neuro">Neuro</a></h3>
+          <p class="gl-tag mono">Academic</p>
+          <ul class="gl-stack" aria-label="Stack"><li title="Python"><svg class="ic" role="img" aria-label="Python"><use href="#i-python"/></svg></li><li title="Pandas"><svg class="ic" role="img" aria-label="Pandas"><use href="#i-pandas"/></svg></li><li title="NumPy"><svg class="ic" role="img" aria-label="NumPy"><use href="#i-numpy"/></svg></li><li title="scikit-learn"><svg class="ic" role="img" aria-label="scikit-learn"><use href="#i-sklearn"/></svg></li><li class="tx">XGBoost</li><li class="tx">LightGBM</li><li class="tx">SHAP</li><li title="FastAPI"><svg class="ic" role="img" aria-label="FastAPI"><use href="#i-fastapi"/></svg></li><li title="Vercel"><svg class="ic" role="img" aria-label="Vercel"><use href="#i-vercel"/></svg></li></ul>
+        </article>
+        <article class="gl rv" id="gl-silentstress">
+          <a class="pv" href="https://secret-stress.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">secret-stress.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/silentstress.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Silent Stress home page with an anonymous sign-in form"><video muted loop playsinline preload="none" data-src="assets/videos/silentstress.mp4" aria-hidden="true"></video></span></a>
+          <h3 class="gl-title"><a href="#small-apps">Silent Stress</a></h3>
+          <p class="gl-tag mono">Personal</p>
+          <ul class="gl-stack" aria-label="Stack"><li title="Next.js"><svg class="ic" role="img" aria-label="Next.js"><use href="#i-next"/></svg></li><li title="Tailwind CSS"><svg class="ic" role="img" aria-label="Tailwind CSS"><use href="#i-tailwind"/></svg></li><li title="Vercel"><svg class="ic" role="img" aria-label="Vercel"><use href="#i-vercel"/></svg></li></ul>
+        </article>
+        <article class="gl rv" id="gl-expensi">
+          <a class="pv" href="https://expensi.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">expensi.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/expensi.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Expensi landing page, headed Split bills without the drama"><video muted loop playsinline preload="none" data-src="assets/videos/expensi.mp4" aria-hidden="true"></video></span></a>
+          <h3 class="gl-title"><a href="#small-apps">Expensi</a></h3>
+          <p class="gl-tag mono">Personal</p>
+          <ul class="gl-stack" aria-label="Stack"><li title="HTML5"><svg class="ic" role="img" aria-label="HTML5"><use href="#i-html"/></svg></li><li title="CSS"><svg class="ic" role="img" aria-label="CSS"><use href="#i-css"/></svg></li><li title="JavaScript"><svg class="ic" role="img" aria-label="JavaScript"><use href="#i-javascript"/></svg></li><li title="Vercel"><svg class="ic" role="img" aria-label="Vercel"><use href="#i-vercel"/></svg></li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="projects" aria-labelledby="projects-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num rv" aria-hidden="true">06</span>
+        <p class="sec-label mono rv"><b>06</b>Projects</p>
+        <h2 class="sec-title rv" id="projects-title"><span class="st">Projects in detail</span></h2>
+        <p class="sec-intro rv">Personal and academic projects, each labelled as such. Numbers are shown with the size of the set they came from. Previews are screenshots of the live builds; select one to open it.</p>
       </div>
       <div class="filters rv" role="group" aria-label="Filter projects">
         <span class="mono lbl" aria-hidden="true">Filter</span>
@@ -592,42 +649,98 @@ ul{list-style:none}
         <button class="chip" type="button" data-filter="web" aria-pressed="false">Web &amp; 3D</button>
         <button class="chip" type="button" data-filter="hw" aria-pressed="false">Hardware</button>
       </div>
-      <div class="projects" id="projects">
-        <article class="proj rv" id="meddoc" data-cat="ai">
-          <a class="pv" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">medicrag.streamlit.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/meddoc.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the MedDoc RAG app: example questions in a sidebar and a question box for the guidelines"><video muted loop playsinline preload="none" data-src="assets/videos/meddoc.mp4" aria-hidden="true"></video></span></a>
-          <div class="proj-head"><p class="proj-tag mono">Personal · solo · Oct 2026</p><h3 class="proj-title">MedDoc RAG</h3></div>
-          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile nl">PyMuPDF</li><li class="tile nl">FAISS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-streamlit"/></svg>Streamlit</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pytest"/></svg>pytest</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-gha"/></svg>GitHub Actions</li></ul>
-          <div class="sheet-links"><a class="lnk" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener">medicrag.streamlit.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><a class="lnk" href="https://github.com/Yusuf-469/RAG" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>github.com/Yusuf-469/RAG<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+            <div class="sheets" id="details">
+        <article class="sheet" id="meddoc" data-cat="ai">
+          <div class="sheet-label rv rv-left"><span class="tag mono">Personal · solo</span><span class="date mono">Oct 2026</span></div>
+          <div class="sheet-body">
+            <h3 class="sheet-title rv">MedDoc RAG</h3>
+            <p class="sheet-sum rv">Citation-grounded question answering over 8 WHO, CDC and NIH guidelines, 1,077 pages in total.</p>
+            <a class="pv rv" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">medicrag.streamlit.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/meddoc.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the MedDoc RAG app: example questions in a sidebar and a question box for the guidelines"><video muted loop playsinline preload="none" data-src="assets/videos/meddoc.mp4" aria-hidden="true"></video></span></a>
+            <dl class="rows">
+              <div class="rv"><dt>Problem</dt><dd>An answer pulled from a long guideline is only useful if each claim can be traced to its source, and if the system refuses questions the documents do not cover.</dd></div>
+              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Shipped pipeline"><li>8 PDFs</li><li>Section-aware chunks</li><li>bge-small + FAISS</li><li>Cross-encoder rerank</li><li>Grounded LLM</li><li>Citation check</li><li>FastAPI</li></ol></dd></div>
+              <div class="rv"><dt>Built</dt><dd>PyMuPDF parsing, section-aware chunking, bge-small embeddings with FAISS and cross-encoder reranking, feeding a grounded LLM answer that is checked against its citations. Served with FastAPI and Streamlit, packaged with Docker, with pytest and GitHub Actions CI. Built on pretrained models.</dd></div>
+              <div class="rv"><dt>Safety</dt><dd>A relevance gate that refuses out-of-scope questions, citation validation, a prompt-injection classifier, output validation, and red-teaming.</dd></div>
+              <div class="rv"><dt>Tested</dt><dd>3 chunking strategies against 5 retrievers, including BM25 with Reciprocal Rank Fusion, on a 48-question golden set I wrote and checked. Scored with Hit@k, MRR and paired bootstrap confidence intervals. Section-aware chunking won. Adding BM25 to dense search showed no significant gain, so I shipped the simpler pipeline.</dd></div>
+              <div class="rv"><dt>Result</dt><dd><strong>95.8% Hit@5</strong> and <strong>0.741 MRR</strong> on that 48-question set. <strong>44 of 48</strong> answers correct in my manual audit. <strong>11 of 11</strong> out-of-scope questions refused. <strong>0</strong> citations to sources the model was not given.</dd></div>
+              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile nl">PyMuPDF</li><li class="tile nl">FAISS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-streamlit"/></svg>Streamlit</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pytest"/></svg>pytest</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-gha"/></svg>GitHub Actions</li></ul></dd></div>
+            </dl>
+            <figure class="chart rv" id="hit5">
+              <figcaption><span class="mono">Hit@5 by chunking strategy · n = 48 questions</span><strong>Section-aware chunking retrieved the right passage most often</strong></figcaption>
+              <svg role="img" aria-label="Bar chart, Hit@5 on 48 questions: fixed-size 83.3%, recursive 89.6%, section-aware 95.8%."></svg>
+            </figure>
+            <p class="sheet-note rv">One question is 2.1 points on a 48-question set. The models are pretrained. Educational project, not medical advice.</p>
+            <div class="sheet-links rv"><a class="lnk" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener">medicrag.streamlit.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><a class="lnk" href="https://github.com/Yusuf-469/RAG" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>github.com/Yusuf-469/RAG<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><span class="lnk-note">The demo is hosted on Streamlit Community Cloud and may take a few seconds to wake up.</span></div>
+          </div>
         </article>
-        <article class="proj rv" id="healix" data-cat="ai web">
-          <a class="pv" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">devops-zeta-nine.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healix.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Healix landing page with its brain-and-circuit logo"><video muted loop playsinline preload="none" data-src="assets/videos/healix.mp4" aria-hidden="true"></video></span></a>
-          <div class="proj-head"><p class="proj-tag mono">Personal</p><h3 class="proj-title">Healix</h3></div>
-          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-react"/></svg>React</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vite"/></svg>Vite</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-tailwind"/></svg>Tailwind CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-three"/></svg>Three.js</li><li class="tile nl">React Three Fiber</li><li class="tile nl">Zustand</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-router"/></svg>React Router</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-openrouter"/></svg>OpenRouter</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jenkins"/></svg>Jenkins</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-aws"/></svg>AWS EC2</li></ul>
-          <div class="sheet-links"><a class="lnk" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener">devops-zeta-nine.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+
+        <article class="sheet" id="healix" data-cat="ai web">
+          <div class="sheet-label rv rv-left"><span class="tag mono">Personal</span></div>
+          <div class="sheet-body">
+            <h3 class="sheet-title rv">Healix</h3>
+            <p class="sheet-sum rv">An AI-assisted healthcare dashboard with five interactive 3D models, in the browser.</p>
+            <a class="pv rv" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">devops-zeta-nine.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healix.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Healix landing page with its brain-and-circuit logo"><video muted loop playsinline preload="none" data-src="assets/videos/healix.mp4" aria-hidden="true"></video></span></a>
+            <dl class="rows">
+              <div class="rv"><dt>Problem</dt><dd>An AI feature in a browser app needs an API key, and that key must never reach the browser.</dd></div>
+              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Interface flow"><li>React UI</li><li>Zustand</li><li>React Three Fiber, 5 GLB models</li></ol><ol class="flow" aria-label="AI request flow"><li>AI request</li><li>Vercel serverless function</li><li>OpenRouter</li></ol></dd></div>
+              <div class="rv"><dt>Built</dt><dd>A responsive React, Vite and Tailwind CSS dashboard with five interactive 3D models in Three.js and React Three Fiber, lazy-loaded so each view only loads when opened. State and routing with Zustand and React Router. LLM chat and report summaries go through OpenRouter via Vercel serverless functions, so the key stays server-side. A separate Jenkins CI/CD pipeline on AWS EC2 builds a Docker image.</dd></div>
+              <div class="rv"><dt>Result</dt><dd>A deployed demo anyone can open.</dd></div>
+              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-react"/></svg>React</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vite"/></svg>Vite</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-tailwind"/></svg>Tailwind CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-three"/></svg>Three.js</li><li class="tile nl">React Three Fiber</li><li class="tile nl">Zustand</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-router"/></svg>React Router</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-openrouter"/></svg>OpenRouter</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jenkins"/></svg>Jenkins</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-aws"/></svg>AWS EC2</li></ul></dd></div>
+            </dl>
+            <div class="sheet-links rv"><a class="lnk" href="https://devops-zeta-nine.vercel.app" target="_blank" rel="noopener">devops-zeta-nine.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+          </div>
         </article>
-        <article class="proj rv" id="healthmonitor" data-cat="hw web">
-          <a class="pv" href="https://final-iot-delta.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">final-iot-delta.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healthmonitor.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the HealthMonitor landing page with a vital-signs dashboard card"><video muted loop playsinline preload="none" data-src="assets/videos/healthmonitor.mp4" aria-hidden="true"></video></span></a>
-          <div class="proj-head"><p class="proj-tag mono">Academic</p><h3 class="proj-title">HealthMonitor</h3></div>
-          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-esp"/></svg>ESP32</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-cpp"/></svg>Embedded C/C++</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-firebase"/></svg>Firebase</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-node"/></svg>Node.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-express"/></svg>Express</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jwt"/></svg>JWT</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jest"/></svg>Jest</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-chartjs"/></svg>Chart.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul>
-          <div class="sheet-links"><a class="lnk" href="https://final-iot-delta.vercel.app" target="_blank" rel="noopener">final-iot-delta.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+
+        <article class="sheet" id="healthmonitor" data-cat="hw web">
+          <div class="sheet-label rv rv-left"><span class="tag mono">Academic</span></div>
+          <div class="sheet-body">
+            <h3 class="sheet-title rv">HealthMonitor</h3>
+            <p class="sheet-sum rv">Vital-sign readings from an ESP32 to a web dashboard, with an alert engine based on NEWS2.</p>
+            <a class="pv rv" href="https://final-iot-delta.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">final-iot-delta.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/healthmonitor.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the HealthMonitor landing page with a vital-signs dashboard card"><video muted loop playsinline preload="none" data-src="assets/videos/healthmonitor.mp4" aria-hidden="true"></video></span></a>
+            <dl class="rows">
+              <div class="rv"><dt>Problem</dt><dd>Turn raw pulse, oxygen and temperature readings into alerts a person can read, instead of a stream of numbers.</dd></div>
+              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Data flow"><li>MAX30102 + DS18B20</li><li>ESP32</li><li>Wi-Fi</li><li>Firebase RTDB</li><li>Alert worker</li><li>Express API</li><li>Dashboard</li></ol></dd></div>
+              <div class="rv"><dt>Built</dt><dd>ESP32 firmware in Embedded C/C++ reading a MAX30102 (heart rate, SpO2) and a DS18B20 (temperature) into Firebase Realtime Database. An alert engine with NEWS2 scoring, adaptive per-patient baselines (z-score), escalation and a clinician-feedback step. A Node.js/Express REST API on Vercel secured with JWT, Helmet, rate-limited login, Firebase Auth and device API keys. A live Chart.js dashboard.</dd></div>
+              <div class="rv"><dt>Tested</dt><dd>40 Jest tests.</dd></div>
+              <div class="rv"><dt>Result</dt><dd>Dashboard deployed on Vercel.</dd></div>
+              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-esp"/></svg>ESP32</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-cpp"/></svg>Embedded C/C++</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-firebase"/></svg>Firebase</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-node"/></svg>Node.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-express"/></svg>Express</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jwt"/></svg>JWT</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-jest"/></svg>Jest</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-chartjs"/></svg>Chart.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul></dd></div>
+            </dl>
+            <p class="sheet-note rv">Academic project. Not a medical device.</p>
+            <div class="sheet-links rv"><a class="lnk" href="https://final-iot-delta.vercel.app" target="_blank" rel="noopener">final-iot-delta.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+          </div>
         </article>
-        <article class="proj rv" id="neuro" data-cat="ai">
-          <a class="pv" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neuro-rose.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neuro.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Neuro landing page, headed Your mind. Finally visible."><video muted loop playsinline preload="none" data-src="assets/videos/neuro.mp4" aria-hidden="true"></video></span></a>
-          <div class="proj-head"><p class="proj-tag mono">Academic</p><h3 class="proj-title">Neuro</h3></div>
-          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pandas"/></svg>Pandas</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-numpy"/></svg>NumPy</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-sklearn"/></svg>scikit-learn</li><li class="tile nl">XGBoost</li><li class="tile nl">LightGBM</li><li class="tile nl">SHAP</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul>
-          <div class="sheet-links"><a class="lnk" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener">neuro-rose.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+
+        <article class="sheet" id="neuro" data-cat="ai">
+          <div class="sheet-label rv rv-left"><span class="tag mono">Academic</span></div>
+          <div class="sheet-body">
+            <h3 class="sheet-title rv">Neuro</h3>
+            <p class="sheet-sum rv">An end-to-end ML pipeline that classifies healthy and mood-disorder subjects from EEG band-power features, with SHAP explanations and a FastAPI service.</p>
+            <a class="pv rv" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neuro-rose.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neuro.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Neuro landing page, headed Your mind. Finally visible."><video muted loop playsinline preload="none" data-src="assets/videos/neuro.mp4" aria-hidden="true"></video></span></a>
+            <dl class="rows">
+              <div class="rv"><dt>Problem</dt><dd>Classify mood disorders from EEG data on a small dataset (n = 361), and check the model beats the simplest possible guess.</dd></div>
+              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Pipeline"><li>EEG features</li><li>Feature engineering</li><li>StandardScaler</li><li>PCA</li><li>SMOTE</li><li>9 ML/DL models</li><li>5-fold CV + test</li><li>SHAP</li><li>FastAPI</li></ol></dd></div>
+              <div class="rv"><dt>Built</dt><dd>Imputation, StandardScaler, PCA and SMOTE (applied to training data only), plus engineered FAA and theta/alpha biomarkers. XGBoost and LightGBM among the models, SHAP for explanations and FastAPI for serving.</dd></div>
+              <div class="rv"><dt>Tested</dt><dd>7 ML and 2 deep learning models (ANN, CNN-LSTM) compared with stratified 5-fold cross-validation, then on 73 held-out samples against a majority-class baseline of 73.7%.</dd></div>
+              <div class="rv"><dt>Result</dt><dd>XGBoost and the voting ensemble reached <strong>80.82%</strong> test accuracy against the <strong>73.7%</strong> baseline, on 73 held-out samples. At that size there is about 9 points of uncertainty.</dd></div>
+              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pandas"/></svg>Pandas</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-numpy"/></svg>NumPy</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-sklearn"/></svg>scikit-learn</li><li class="tile nl">XGBoost</li><li class="tile nl">LightGBM</li><li class="tile nl">SHAP</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul></dd></div>
+            </dl>
+            <p class="sheet-note rv">Academic project. Not a diagnostic tool.</p>
+            <div class="sheet-links rv"><a class="lnk" href="https://neuro-rose.vercel.app" target="_blank" rel="noopener">neuro-rose.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+          </div>
         </article>
-        <article class="proj rv" id="silentstress" data-cat="web">
-          <a class="pv" href="https://secret-stress.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">secret-stress.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/silentstress.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Silent Stress home page with an anonymous sign-in form"><video muted loop playsinline preload="none" data-src="assets/videos/silentstress.mp4" aria-hidden="true"></video></span></a>
-          <div class="proj-head"><p class="proj-tag mono">Personal</p><h3 class="proj-title">Silent Stress</h3></div>
-          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-next"/></svg>Next.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-tailwind"/></svg>Tailwind CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul>
-          <div class="sheet-links"><a class="lnk" href="https://secret-stress.vercel.app" target="_blank" rel="noopener">secret-stress.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
-        </article>
-        <article class="proj rv" id="expensi" data-cat="web">
-          <a class="pv" href="https://expensi.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">expensi.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/expensi.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Expensi landing page, headed Split bills without the drama"><video muted loop playsinline preload="none" data-src="assets/videos/expensi.mp4" aria-hidden="true"></video></span></a>
-          <div class="proj-head"><p class="proj-tag mono">Personal</p><h3 class="proj-title">Expensi</h3></div>
-          <ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-html"/></svg>HTML5</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-css"/></svg>CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-javascript"/></svg>JavaScript</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul>
-          <div class="sheet-links"><a class="lnk" href="https://expensi.vercel.app" target="_blank" rel="noopener">expensi.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+
+        <article class="sheet" id="small-apps" data-cat="web">
+          <div class="sheet-label rv rv-left"><span class="tag mono">Personal</span></div>
+          <div class="sheet-body">
+            <h3 class="sheet-title rv">Silent Stress and Expensi</h3>
+            <p class="sheet-sum rv">Two small web apps, both deployed on Vercel.</p>
+            <div class="pv-pair"><a class="pv rv" href="https://secret-stress.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">secret-stress.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/silentstress.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Silent Stress home page with an anonymous sign-in form"><video muted loop playsinline preload="none" data-src="assets/videos/silentstress.mp4" aria-hidden="true"></video></span></a><a class="pv rv" href="https://expensi.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">expensi.vercel.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/expensi.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the Expensi landing page, headed Split bills without the drama"><video muted loop playsinline preload="none" data-src="assets/videos/expensi.mp4" aria-hidden="true"></video></span></a></div>
+            <dl class="rows">
+              <div class="rv"><dt>Silent Stress</dt><dd class="stk">An anonymous platform for reporting academic stress.<ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-next"/></svg>Next.js</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-tailwind"/></svg>Tailwind CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul></dd></div>
+              <div class="rv"><dt>Expensi</dt><dd class="stk">A bill-splitting and shared-expense tracker.<ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-html"/></svg>HTML5</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-css"/></svg>CSS</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-javascript"/></svg>JavaScript</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-vercel"/></svg>Vercel</li></ul></dd></div>
+            </dl>
+            <div class="sheet-links rv"><a class="lnk" href="https://secret-stress.vercel.app" target="_blank" rel="noopener">secret-stress.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><a class="lnk" href="https://expensi.vercel.app" target="_blank" rel="noopener">expensi.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+          </div>
         </article>
       </div>
     </div>
@@ -636,8 +749,8 @@ ul{list-style:none}
   <section class="section" id="contact" aria-labelledby="contact-title">
     <div class="wrap">
       <div class="sec-head">
-        <span class="sec-num rv" aria-hidden="true">06</span>
-        <p class="sec-label mono rv"><b>06</b>Contact</p>
+        <span class="sec-num rv" aria-hidden="true">07</span>
+        <p class="sec-label mono rv"><b>07</b>Contact</p>
         <h2 class="sec-title rv" id="contact-title"><span class="st">Contact</span></h2>
       </div>
       <p class="contact-line rv">I am looking for a role where I can build practical AI tools and keep learning from the people who use them every day.</p>
@@ -781,7 +894,7 @@ ul{list-style:none}
   }
 
   /* filters (projects only) */
-  var chips=$$('.chip'),projects=$$('#projects .proj');
+  var chips=$$('.chip'),projects=$$('#projects [data-cat]');
   function applyFilter(f){
     chips.forEach(function(c){c.setAttribute('aria-pressed',String(c.dataset.filter===f))});
     projects.forEach(function(s){
@@ -795,7 +908,7 @@ ul{list-style:none}
   $$('.sheet,.proj').forEach(function(s){s.addEventListener('animationend',function(e){if(e.animationName==='fltIn')s.classList.remove('flt');if(e.animationName==='flash')s.classList.remove('flash')})});
 
   /* "How I work" cards jump to their project */
-  $$('.card').forEach(function(card){
+  $$('.card,.gl-title a').forEach(function(card){
     card.addEventListener('click',function(e){
       var t=document.getElementById(card.getAttribute('href').slice(1));
       if(!t)return;
@@ -817,7 +930,7 @@ ul{list-style:none}
     });
   }
   if('IntersectionObserver' in window){
-    var spyIds=['top','approach','stack','education','experience','work','contact'],inBand={};
+    var spyIds=['top','approach','stack','education','experience','work','projects','contact'],inBand={};
     var spy=new IntersectionObserver(function(es){
       es.forEach(function(e){inBand[e.target.id]=e.isIntersecting});
       var cur=null;
