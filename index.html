@@ -435,7 +435,7 @@ ul{list-style:none}
             <div class="ph"><img src="assets/portrait.jpg" width="640" height="640" alt="Portrait of Md Yusuf Jawed" fetchpriority="high"></div>
           </div>
           <h1 class="h-name"><span class="h-name-in">Md Yusuf Jawed</span></h1>
-          <p class="h-intro">I design, build and evaluate applied AI systems: retrieval-augmented generation with citation-grounded answers, machine learning models benchmarked against baselines, and full-stack tools deployed as working web apps. Final-year B.Tech CSE (AI&nbsp;&amp;&nbsp;ML) student at SRM IST, with six months of client-facing web development.</p>
+          <p class="h-intro">I design, build and evaluate applied AI systems: an AI agent that operates a computer, reinforcement learning on a hospital digital twin, retrieval-augmented generation with citation-grounded answers, and full-stack tools deployed as working web apps. Final-year B.Tech CSE (AI&nbsp;&amp;&nbsp;ML) student at SRM IST, with six months of client-facing web development.</p>
           <p class="h-skills" aria-label="Skills: Python, JavaScript, SQL; Machine Learning, Deep Learning, RAG; React, Three.js, FastAPI, Docker">
             <span class="grp">Python · JavaScript · SQL</span><span class="sep" aria-hidden="true">/</span>
             <span class="grp">Machine Learning · Deep Learning · RAG</span><span class="sep" aria-hidden="true">/</span>
@@ -596,6 +596,18 @@ ul{list-style:none}
         <p class="sec-intro rv">A quick look at every project and its stack. Hover a preview to see it running; the full write-ups follow in the next section.</p>
       </div>
       <div class="glance" id="glance">
+        <article class="gl rv" id="gl-neurotwin">
+          <a class="pv" href="https://neurotwin-swart.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neurotwin-swart.vercel.app</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neurotwin.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of NeuroTwin: who gets the next hospital bed, with a live floor plan and an RL agent's decision"></span></a>
+          <h3 class="gl-title"><a href="#neurotwin">NeuroTwin</a></h3>
+          <p class="gl-tag mono">Personal research · solo · Oct 2026</p>
+          <ul class="gl-stack" aria-label="Stack"><li title="Python"><svg class="ic" role="img" aria-label="Python"><use href="#i-python"/></svg></li><li class="tx">PyTorch</li><li class="tx">Gymnasium</li><li title="FastAPI"><svg class="ic" role="img" aria-label="FastAPI"><use href="#i-fastapi"/></svg></li><li class="tx">Next.js</li><li class="tx">TypeScript</li><li title="Docker"><svg class="ic" role="img" aria-label="Docker"><use href="#i-docker"/></svg></li><li title="pytest"><svg class="ic" role="img" aria-label="pytest"><use href="#i-pytest"/></svg></li></ul>
+        </article>
+        <article class="gl rv" id="gl-orion">
+          <a class="pv" href="https://github.com/Yusuf-469/orion" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Code</span><span class="pv-url">github.com/Yusuf-469/orion</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/orion.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the ORION interface: the ORION core, a goal box with a microphone, and quick actions"></span></a>
+          <h3 class="gl-title"><a href="#orion">ORION</a></h3>
+          <p class="gl-tag mono">Final-year project · solo · Oct 2026</p>
+          <ul class="gl-stack" aria-label="Stack"><li title="Python"><svg class="ic" role="img" aria-label="Python"><use href="#i-python"/></svg></li><li class="tx">Qwen2.5-7B</li><li class="tx">Ollama</li><li class="tx">Playwright</li><li class="tx">UI Automation</li><li class="tx">faster-whisper</li><li class="tx">scikit-learn</li><li class="tx">pywebview</li><li title="pytest"><svg class="ic" role="img" aria-label="pytest"><use href="#i-pytest"/></svg></li></ul>
+        </article>
         <article class="gl rv" id="gl-meddoc">
           <a class="pv" href="https://medicrag.streamlit.app/" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">medicrag.streamlit.app</span><span class="pv-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.2v7.6L8.6 5z" fill="currentColor"/></svg>Preview</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/meddoc.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the MedDoc RAG app: example questions in a sidebar and a question box for the guidelines"><video muted loop playsinline preload="none" data-src="assets/videos/meddoc.mp4?v=40963" aria-hidden="true"></video></span></a>
           <h3 class="gl-title"><a href="#meddoc">MedDoc RAG</a></h3>
@@ -652,6 +664,45 @@ ul{list-style:none}
         <button class="chip" type="button" data-filter="hw" aria-pressed="false">Hardware</button>
       </div>
             <div class="sheets" id="details">
+        <article class="sheet" id="neurotwin" data-cat="ai web">
+          <div class="sheet-label rv rv-left"><span class="tag mono">Personal research · solo</span><span class="date mono">Oct 2026</span></div>
+          <div class="sheet-body">
+            <h3 class="sheet-title rv">NeuroTwin</h3>
+            <p class="sheet-sum rv">A hospital digital twin for testing whether a reinforcement-learning agent allocates beds better than hand-made rules, including under stress it never trained on.</p>
+            <a class="pv" href="https://neurotwin-swart.vercel.app" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Live</span><span class="pv-url">neurotwin-swart.vercel.app</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/neurotwin.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of NeuroTwin: who gets the next hospital bed, with a live floor plan and an RL agent's decision"></span></a>
+            <dl class="rows">
+              <div class="rv"><dt>Problem</dt><dd>Bed allocation decides who waits in the emergency department. Simple rules are hard to beat, and a learned policy that looks better on the data it was tuned on may not be better on fresh days or in a crisis.</dd></div>
+              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Pipeline"><li>Discrete-event simulator</li><li>Digital twin</li><li>Gymnasium env</li><li>PPO from scratch</li><li>Pre-registered test</li><li>FastAPI</li><li>Next.js dashboard</li></ol></dd></div>
+              <div class="rv"><dt>Built</dt><dd>A discrete-event simulator of an emergency department, wards and ICU written from scratch, with nurse staffing, off-service placement, ICU step-down and deterioration. PPO implemented from scratch in PyTorch (masked actions, semi-Markov reward), checked against stable-baselines3. Rule-based baselines and an exact optimisation model. A what-if engine and a live race where every decision-maker gets the same patients.</dd></div>
+              <div class="rv"><dt>Tested</dt><dd>The simulator matches M/M/c and M/M/c/K queueing theory (15 of 15 checks inside the 95% interval). 2,500 test episodes on seeds never used for tuning, hierarchical paired bootstrap and Holm correction, with the protocol committed before the test run.</dd></div>
+              <div class="rv"><dt>Result</dt><dd>The RL agent cut cost by <strong>8.5%</strong> against the best tuned rule on normal days (Holm p = 0.0005) and tied it under stress. One agent could collapse under stress; a pre-registered safety guard took collapses from <strong>5 to 0</strong> of 1,250 episodes. An early validation advantage disappeared on fresh seeds, and I report that too.</dd></div>
+              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile nl">PyTorch</li><li class="tile nl">Gymnasium</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-fastapi"/></svg>FastAPI</li><li class="tile nl">Next.js</li><li class="tile nl">TypeScript</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-docker"/></svg>Docker</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pytest"/></svg>pytest</li><li class="tile nl">Render</li><li class="tile nl">Vercel</li></ul></dd></div>
+            </dl>
+            <p class="sheet-note rv">Simulation only: the model is not calibrated to any real hospital and is not a clinical or decision-support tool. 140+ automated tests.</p>
+            <div class="sheet-links rv"><a class="lnk" href="https://neurotwin-swart.vercel.app" target="_blank" rel="noopener">neurotwin-swart.vercel.app<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><a class="lnk" href="https://github.com/Yusuf-469/neurotwin" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>github.com/Yusuf-469/neurotwin<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a><span class="lnk-note">The API sleeps when idle; the first load can take about a minute.</span></div>
+          </div>
+        </article>
+
+        <article class="sheet" id="orion" data-cat="ai">
+          <div class="sheet-label rv rv-left"><span class="tag mono">Final-year project · solo</span><span class="date mono">Oct 2026</span></div>
+          <div class="sheet-body">
+            <h3 class="sheet-title rv">ORION</h3>
+            <p class="sheet-sum rv">An AI agent that operates a Windows computer from spoken or typed goals: it researches, writes documents, fills forms and uses apps, and asks before anything that matters.</p>
+            <a class="pv" href="https://github.com/Yusuf-469/orion" target="_blank" rel="noopener"><span class="pv-bar"><span class="pv-live mono">Code</span><span class="pv-url">github.com/Yusuf-469/orion</span><svg class="pv-ext" aria-hidden="true"><use href="#i-ext"/></svg></span><span class="pv-img"><img src="assets/previews/orion.webp" width="960" height="600" loading="lazy" decoding="async" alt="Screenshot of the ORION interface: the ORION core, a goal box with a microphone, and quick actions"></span></a>
+            <dl class="rows">
+              <div class="rv"><dt>Problem</dt><dd>Computers are hard to use for many people, and AI agents that click around on their own can do damage: a wrong guess becomes a wrong click, and text on a web page can become an instruction.</dd></div>
+              <div class="rv"><dt>Flow</dt><dd><ol class="flow" aria-label="Agent loop"><li>Voice or text goal</li><li>Plan</li><li>Act through typed tools</li><li>Policy check</li><li>Verify</li><li>Recover</li><li>Report</li></ol></dd></div>
+              <div class="rv"><dt>Built</dt><dd>An agent loop on a local 7B model (Qwen2.5 via Ollama, free and offline) with web tools in its own browser, desktop control through UI Automation, Word documents, push-to-talk speech (faster-whisper) and spoken replies. Skills for multi-step jobs: comparing products and matching jobs to a CV. A cosmic-styled interface with a live view of what the agent is doing.</dd></div>
+              <div class="rv"><dt>Safety</dt><dd>Enforced in code outside the model: an allowlist of typed tools, a policy engine, approval before anything is sent, a kill switch, prompt-injection handling (hidden page text stripped) and verification of every result. A goal that says "do not apply" does not even get the sending tool.</dd></div>
+              <div class="rv"><dt>Tested</dt><dd>Four real tasks run 5 times each, scored by independent checks of the result; a 40-task benchmark run 5 times per task; a learned UI-grounding model evaluated on unseen layouts.</dd></div>
+              <div class="rv"><dt>Result</dt><dd>With the same 7B model, the four tasks went from <strong>0-1 of 5</strong> to <strong>5 of 5</strong> through engineering (a self-check before sending, per-task tool scoping, skill pipelines). Benchmark: <strong>200/200</strong> runs completed with <strong>0</strong> safety violations. The learned grounding model raised correct clicks on unseen layouts from <strong>63% to 90%</strong>.</dd></div>
+              <div class="rv"><dt>Stack</dt><dd><ul class="mini" aria-label="Stack"><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-python"/></svg>Python</li><li class="tile nl">Qwen2.5-7B</li><li class="tile nl">Ollama</li><li class="tile nl">Playwright</li><li class="tile nl">UI Automation</li><li class="tile nl">faster-whisper</li><li class="tile nl">scikit-learn</li><li class="tile nl">pywebview</li><li class="tile"><svg class="ic" aria-hidden="true"><use href="#i-pytest"/></svg>pytest</li></ul></dd></div>
+            </dl>
+            <p class="sheet-note rv">Measured on test websites built for the project plus a few real pages; it always asks before sending anything.</p>
+            <div class="sheet-links rv"><a class="lnk" href="https://github.com/Yusuf-469/orion" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>github.com/Yusuf-469/orion<svg class="ext" aria-hidden="true"><use href="#i-ext"/></svg></a></div>
+          </div>
+        </article>
+
         <article class="sheet" id="meddoc" data-cat="ai">
           <div class="sheet-label rv rv-left"><span class="tag mono">Personal · solo</span><span class="date mono">Oct 2026</span></div>
           <div class="sheet-body">
