@@ -119,10 +119,127 @@ composer.addPass(bloom);
 composer.addPass(new OutputPass());
 composer.addPass(cam);
 
+// ---------------------------------------------------------------- hero: floating skill logos
+// Official logos of the skills used in the projects (assets/data/skills.json) drift around the
+// portrait. Hover (or tap) one to see which projects used it, with a small preview of each;
+// clicking a project opens its case study. ~25 sprites and one HTML tag: no measurable cost.
+function makeLogos(scene, camera, list) {
+  const group = new THREE.Group();
+  scene.add(group);
+  const n = list.length;
+  const tip = document.createElement('div');
+  tip.className = 'skill-tip';
+  tip.setAttribute('role', 'tooltip');
+  tip.hidden = true;
+  document.body.appendChild(tip);
+  let shown = -1, pinned = -1, hideAt = 0;
+
+  // spread the logos evenly over the parts of the ring that are free of text
+  // (desktop: the name sits left, the tagline right; phones: tagline on top, name below)
+  const gaps = MOBILE ? [[Math.PI / 2, 0.55], [-Math.PI / 2, 1.0]] : [[Math.PI, 0.55], [0, 0.32]];
+  const free = (a) => gaps.every(([c, r]) => Math.abs(Math.atan2(Math.sin(a - c), Math.cos(a - c))) > r);
+  const angles = [];
+  for (let k = 0; k < 720 && angles.length < 720; k++) { const a = (k / 720) * Math.PI * 2; if (free(a)) angles.push(a); }
+  const pick = (i) => angles[Math.floor(((i + 0.5) / n) * angles.length)];
+  const items = list.map((sk, i) => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const img = new Image();
+    img.onload = () => { const g = c.getContext('2d'); g.clearRect(0, 0, 128, 128); g.drawImage(img, 16, 16, 96, 96); tex.needsUpdate = true; };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(sk.svg);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0 });
+    const sp = new THREE.Sprite(mat);
+    group.add(sp);
+    // an ellipse around the portrait, wider than the face so nothing sits on it
+    const a = pick(i) + rand(-0.03, 0.03);
+    const rx = (MOBILE ? 3.3 : 6.5) + rand(-0.5, 0.6), ry = (MOBILE ? 5.0 : 3.9) + rand(-0.4, 0.4);
+    const base = new THREE.Vector3(Math.cos(a) * rx, Math.sin(a) * ry + (MOBILE ? 0.6 : 0), rand(-3.2, -0.6));
+    const html = `<b>${sk.name}</b><small>used in</small><ul>` + sk.projects.map((p) =>
+      `<li><button type="button" data-case="${p.id}"><img src="${p.img}" alt="" width="64" height="40" loading="lazy" decoding="async"><span>${p.name}</span></button></li>`).join('') + '</ul>';
+    return { sp, mat, base, seed: rand(), hover: 0, html, pos: new THREE.Vector3(), screen: new THREE.Vector3() };
+  });
+
+  const size = MOBILE ? 0.62 : 0.72;
+  function show(i, w, h) {
+    if (i !== shown) { tip.innerHTML = items[i].html; shown = i; }
+    tip.hidden = false;
+    const s = items[i].screen;
+    const x = (s.x * 0.5 + 0.5) * w, y = (-s.y * 0.5 + 0.5) * h;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    const left = x + 30 + tw > w - 8 ? x - 30 - tw : x + 30;
+    tip.style.left = Math.max(8, left) + 'px';
+    tip.style.top = Math.min(h - th - 8, Math.max(8, y - th / 2)) + 'px';
+    requestAnimationFrame(() => tip.classList.add('on'));
+  }
+  function hide() { tip.classList.remove('on'); tip.hidden = true; shown = -1; pinned = -1; }
+  function nearest(px, py, w, h) {
+    let best = -1, bd = 1e9;
+    const r = (size / (2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)))) * h * 0.75 + 8;
+    items.forEach((it, i) => {
+      const dx = (it.screen.x - px) * w / 2, dy = (it.screen.y - py) * h / 2, d = Math.hypot(dx, dy);
+      if (d < r && d < bd) { bd = d; best = i; }
+    });
+    return best;
+  }
+
+  return {
+    update(t, time, ptr, intro) {
+      const w = innerWidth, h = innerHeight;
+      const exit = smooth(0.32, 0.8, t);
+      for (const it of items) {
+        it.pos.set(
+          it.base.x + Math.sin(time * 0.42 + it.seed * 10) * 0.2,
+          it.base.y + Math.cos(time * 0.35 + it.seed * 7) * 0.16,
+          it.base.z,
+        );
+        it.pos.multiplyScalar(1 + exit * 1.3);
+        it.pos.z += exit * 7;
+        it.screen.copy(it.pos).project(camera);
+        // drift away from the cursor
+        if (ptr.active) {
+          const dx = it.screen.x - ptr.rawX, dy = it.screen.y - ptr.rawY;
+          const f = Math.exp(-(dx * dx * (w / h) * (w / h) + dy * dy) * 10);
+          it.pos.x += Math.sign(dx) * f * 0.35; it.pos.y += Math.sign(dy) * f * 0.25;
+        }
+      }
+      const hov = ptr.active && t < 0.3 ? nearest(ptr.rawX, ptr.rawY, w, h) : -1;
+      items.forEach((it, i) => {
+        it.hover += ((i === hov || i === pinned ? 1 : 0) - it.hover) * 0.2;
+        it.sp.position.copy(it.pos);
+        it.sp.scale.setScalar(size * (1 + it.hover * 0.35));
+        it.mat.opacity = intro * (1 - exit) * (0.7 + it.hover * 0.3);
+      });
+      canvas.style.cursor = hov >= 0 ? 'pointer' : '';
+      const want = hov >= 0 ? hov : pinned;
+      if (t >= 0.3) { if (shown >= 0) hide(); return; }
+      // the tag stays open while the pointer is inside it, so its projects can be clicked
+      let overTip = false;
+      if (shown >= 0 && ptr.active) {
+        const r = tip.getBoundingClientRect(), px = (ptr.rawX * 0.5 + 0.5) * w, py = (-ptr.rawY * 0.5 + 0.5) * h;
+        overTip = px >= r.left - 12 && px <= r.right + 12 && py >= r.top - 12 && py <= r.bottom + 12;
+      }
+      if (overTip) { hideAt = 0; return; }
+      if (want >= 0) { show(want, w, h); hideAt = 0; }
+      else if (shown >= 0) {
+        if (!hideAt) hideAt = performance.now() + 250;
+        if (performance.now() > hideAt) { hide(); hideAt = 0; }
+      }
+    },
+    tapAt(x, y) {
+      const w = innerWidth, h = innerHeight;
+      const i = nearest((x / w) * 2 - 1, -((y / h) * 2 - 1), w, h);
+      if (i >= 0) { pinned = i; show(i, w, h); } else hide();
+    },
+    hide,
+  };
+}
+
 // ---------------------------------------------------------------- hero: pixel-block portrait
 // Quadtree blocks from the photo (assets/data/hero-cells.json). The grid fades in over 1.5 s,
 // blocks glitch along rows, and the cursor pushes them away like a field.
-function makeHero(data) {
+function makeHero(data, skills) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x020304);
   const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
@@ -208,29 +325,26 @@ function makeHero(data) {
   const group = new THREE.Group();
   group.add(mesh);
   scene.add(group);
-  const sym = makeSymbols(['</>', '{ }', 'λ', 'Σ', '∇', 'AI', 'ML', 'py', 'js', '01', '→', '#', '∂', 'f(x)', '[ ]', '=>'],
-    Math.round(60 * Q + 26), [-11, 11, -6.5, 6.5, -6, -0.8], 0.75, 10.5); // behind and around the portrait, never over the face
-  scene.add(sym.object);
+  const logos = makeLogos(scene, camera, skills);
 
   let dist = 15, lift = 0;
   const born = performance.now() / 1000;
   const ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), hit = new THREE.Vector3();
   const cur = mat.uniforms.uCursor.value;
   return {
-    scene, camera, bloom: [0.4, 0.5, 0.95], edge: 0x000000, vig: 1,
+    scene, camera, bloom: [0.4, 0.5, 0.95], edge: 0x000000, vig: 1, tapAt: (x, y) => logos.tapAt(x, y), leave: () => { logos.hide(); canvas.style.cursor = ''; },
     resize(w, h) {
       camera.aspect = w / h; camera.updateProjectionMatrix();
       const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
       dist = Math.max(3.5 / tan / 0.86, 3.5 / (tan * camera.aspect) / (MOBILE ? 1.05 : 0.95));
       lift = MOBILE ? 0.9 : 0;
-      sym.resize(w, h);
     },
     update(t, time, dt, ptr) {
       mat.uniforms.uTime.value = time;
-      sym.update(time, ptr);
       // grid reveal: 1.5 s, ease-out
       const k = clamp01((time - born) / 1.5);
       mat.uniforms.uIntro.value = 1 - (1 - k) * (1 - k);
+      logos.update(t, time, ptr, clamp01((time - born - 0.8) / 1.2));
       mat.uniforms.uBreak.value = clamp01((t - 0.02) / 0.4);
       mat.uniforms.uExit.value = smooth(0.5, 1, t);
       sphere.material.uniforms.uTime.value = time;
@@ -1170,11 +1284,13 @@ const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(url
 async function start() {
   tick(0.05);
   const pointsReq = getJSON('assets/data/portrait-points.json');
+  const skillsReq = getJSON('assets/data/skills.json').catch(() => []);
   const cells = await getJSON('assets/data/hero-cells.json'); tick(0.4);
   await Promise.race([document.fonts ? document.fonts.ready : null, new Promise((r) => setTimeout(r, 2500))]); tick(0.55);
   const points = await pointsReq; tick(0.7);
+  const skills = await skillsReq;
 
-  const builders = { hero: () => makeHero(cells), work: makeWork, network: makeNetwork, signals: makeSignals, portrait: () => makeFinale(points) };
+  const builders = { hero: () => makeHero(cells, skills), work: makeWork, network: makeNetwork, signals: makeSignals, portrait: () => makeFinale(points) };
   const SCENES = site.names.map((n) => builders[n]());
   tick(0.9);
 
@@ -1203,6 +1319,7 @@ async function start() {
   canvas.addEventListener('click', (e) => {
     if (downAt && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 8) return; // a drag, not a click
     const S = SCENES[site.idx];
+    if (S.tapAt) { S.tapAt(e.clientX, e.clientY); return; }
     if (!S.pick) return;
     pointer.rawX = (e.clientX / innerWidth) * 2 - 1; pointer.rawY = -((e.clientY / innerHeight) * 2 - 1);
     ray.setFromCamera({ x: pointer.rawX, y: pointer.rawY }, S.camera);
