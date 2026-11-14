@@ -142,10 +142,10 @@ function makeHero(data) {
 
   const N = data.n, cells = data.cells, count = cells.length / 4, U = 7 / N;
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uIntro: { value: 0 }, uExit: { value: 0 }, uCursor: { value: new THREE.Vector3(99, 99, 0) }, uTint: { value: TEAL }, uPhoto: { value: null }, uHas: { value: 0 } },
+    uniforms: { uTime: { value: 0 }, uIntro: { value: 0 }, uExit: { value: 0 }, uCursor: { value: new THREE.Vector3(99, 99, 0) }, uTint: { value: TEAL }, uPhoto: { value: null }, uHas: { value: 0 }, uBreak: { value: 0 } },
     vertexShader: /* glsl */ `
-      attribute float aLum, aSeed, aSize; uniform float uTime, uExit; uniform vec3 uCursor;
-      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush;
+      attribute float aLum, aSeed, aSize; uniform float uTime, uExit, uBreak, uHas; uniform vec3 uCursor;
+      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush, vMono;
       void main(){
         vUv = uv; vLum = aLum; vSeed = aSeed; vB = 0.13 / sqrt(aSize);
         vec4 p = instanceMatrix * vec4(position, 1.0);
@@ -154,20 +154,26 @@ function makeHero(data) {
         vec2 d = ctr.xy - uCursor.xy;
         float f = exp(-dot(d, d) / 0.45) * uCursor.z;
         vPush = f;
+        // the colour photo breaks into blocks from the top as you scroll, and locally under the cursor
+        float edge = uBreak * 1.2 - (0.5 - ctr.y / 7.0) - aSeed * 0.15;
+        vMono = uHas > 0.5 ? max(clamp(edge * 10.0, 0.0, 1.0), smoothstep(0.15, 0.7, f)) : 1.0;
+        p.z += sin(vMono * 3.1416) * 0.3;
         p.xy += normalize(d + 1e-4) * f * 0.35;
         p.z += f * (0.6 + aSeed * 1.2);
         float row = floor(p.y * 7.0), tick = floor(uTime * 7.0);
         float r = fract(sin(row * 91.7 + tick * 13.1) * 4375.5);
-        p.x += step(0.975, r) * (r - 0.987) * 4.0;
+        p.x += step(0.975, r) * (r - 0.987) * 4.0 * vMono;
         p.z += uExit * aSeed * 9.0;
         p.xy *= 1.0 + uExit * aSeed * 0.8;
         gl_Position = projectionMatrix * modelViewMatrix * p;
       }`,
     fragmentShader: /* glsl */ `
-      uniform float uTime, uIntro, uExit, uHas; uniform vec3 uTint; uniform sampler2D uPhoto;
-      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush;
+      uniform float uTime, uIntro, uExit, uHas, uBreak; uniform vec3 uTint; uniform sampler2D uPhoto;
+      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush, vMono;
       void main(){
         if (vSeed > uIntro) discard;
+        vec4 ph = texture2D(uPhoto, vPhoto);
+        if (uHas > 0.5 && vMono < 0.5 && ph.a < 0.5) discard; // clean cut-out edge while in colour
         vec2 e = min(vUv, 1.0 - vUv);
         float border = step(min(e.x, e.y), vB);
         float flick = step(0.997, fract(sin(vSeed * 7123.1 + floor(uTime * 9.0)) * 9123.7));
@@ -178,7 +184,10 @@ function makeHero(data) {
           l = clamp((dot(ph, vec3(0.299, 0.587, 0.114)) - 0.05) / 0.98, 0.0, 1.0);
         }
         vec3 base = mix(uTint * 0.09, mix(uTint, vec3(1.0), 0.66), pow(l, 1.2));
-        vec3 col = mix(base, base * 0.35, border) + flick * 0.7 + vPush * uTint * 0.6;
+        vec3 mono = mix(base, base * 0.35, border) + flick * 0.7 + vPush * uTint * 0.6;
+        vec3 col = mix(ph.rgb * 0.94, mono, vMono);
+        float line = uBreak * 1.2 - (1.0 - vPhoto.y);
+        col += vec3(0.6, 1.0, 1.0) * smoothstep(0.018, 0.0, abs(line)) * step(0.001, uBreak) * step(uBreak, 0.999) * 1.4;
         gl_FragColor = vec4(col * (1.0 - uExit * 0.55), 1.0);
       }`,
   });
@@ -217,7 +226,8 @@ function makeHero(data) {
       // grid reveal: 1.5 s, ease-out
       const k = clamp01((time - born) / 1.5);
       mat.uniforms.uIntro.value = 1 - (1 - k) * (1 - k);
-      mat.uniforms.uExit.value = smooth(0.45, 1, t);
+      mat.uniforms.uBreak.value = clamp01((t - 0.02) / 0.4);
+      mat.uniforms.uExit.value = smooth(0.5, 1, t);
       sphere.material.uniforms.uTime.value = time;
       sphere.rotation.y = time * 0.012 + t * 0.5;
       group.rotation.y = ptr.x * 0.1;
