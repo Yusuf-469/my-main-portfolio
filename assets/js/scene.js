@@ -119,10 +119,127 @@ composer.addPass(bloom);
 composer.addPass(new OutputPass());
 composer.addPass(cam);
 
+// ---------------------------------------------------------------- hero: floating skill logos
+// Official logos of the skills used in the projects (assets/data/skills.json) drift around the
+// portrait. Hover (or tap) one to see which projects used it, with a small preview of each;
+// clicking a project opens its case study. ~25 sprites and one HTML tag: no measurable cost.
+function makeLogos(scene, camera, list) {
+  const group = new THREE.Group();
+  scene.add(group);
+  const n = list.length;
+  const tip = document.createElement('div');
+  tip.className = 'skill-tip';
+  tip.setAttribute('role', 'tooltip');
+  tip.hidden = true;
+  document.body.appendChild(tip);
+  let shown = -1, pinned = -1, hideAt = 0;
+
+  // spread the logos evenly over the parts of the ring that are free of text
+  // (desktop: the name sits left, the tagline right; phones: tagline on top, name below)
+  const gaps = MOBILE ? [[Math.PI / 2, 0.55], [-Math.PI / 2, 1.0]] : [[Math.PI, 0.55], [0, 0.32]];
+  const free = (a) => gaps.every(([c, r]) => Math.abs(Math.atan2(Math.sin(a - c), Math.cos(a - c))) > r);
+  const angles = [];
+  for (let k = 0; k < 720 && angles.length < 720; k++) { const a = (k / 720) * Math.PI * 2; if (free(a)) angles.push(a); }
+  const pick = (i) => angles[Math.floor(((i + 0.5) / n) * angles.length)];
+  const items = list.map((sk, i) => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const img = new Image();
+    img.onload = () => { const g = c.getContext('2d'); g.clearRect(0, 0, 128, 128); g.drawImage(img, 16, 16, 96, 96); tex.needsUpdate = true; };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(sk.svg);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0 });
+    const sp = new THREE.Sprite(mat);
+    group.add(sp);
+    // an ellipse around the portrait, wider than the face so nothing sits on it
+    const a = pick(i) + rand(-0.03, 0.03);
+    const rx = (MOBILE ? 3.3 : 6.5) + rand(-0.5, 0.6), ry = (MOBILE ? 5.0 : 3.9) + rand(-0.4, 0.4);
+    const base = new THREE.Vector3(Math.cos(a) * rx, Math.sin(a) * ry + (MOBILE ? 0.6 : 0), rand(-3.2, -0.6));
+    const html = `<b>${sk.name}</b><small>used in</small><ul>` + sk.projects.map((p) =>
+      `<li><button type="button" data-case="${p.id}"><img src="${p.img}" alt="" width="64" height="40" loading="lazy" decoding="async"><span>${p.name}</span></button></li>`).join('') + '</ul>';
+    return { sp, mat, base, seed: rand(), hover: 0, html, pos: new THREE.Vector3(), screen: new THREE.Vector3() };
+  });
+
+  const size = MOBILE ? 0.62 : 0.72;
+  function show(i, w, h) {
+    if (i !== shown) { tip.innerHTML = items[i].html; shown = i; }
+    tip.hidden = false;
+    const s = items[i].screen;
+    const x = (s.x * 0.5 + 0.5) * w, y = (-s.y * 0.5 + 0.5) * h;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    const left = x + 30 + tw > w - 8 ? x - 30 - tw : x + 30;
+    tip.style.left = Math.max(8, left) + 'px';
+    tip.style.top = Math.min(h - th - 8, Math.max(8, y - th / 2)) + 'px';
+    requestAnimationFrame(() => tip.classList.add('on'));
+  }
+  function hide() { tip.classList.remove('on'); tip.hidden = true; shown = -1; pinned = -1; }
+  function nearest(px, py, w, h) {
+    let best = -1, bd = 1e9;
+    const r = (size / (2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)))) * h * 0.75 + 8;
+    items.forEach((it, i) => {
+      const dx = (it.screen.x - px) * w / 2, dy = (it.screen.y - py) * h / 2, d = Math.hypot(dx, dy);
+      if (d < r && d < bd) { bd = d; best = i; }
+    });
+    return best;
+  }
+
+  return {
+    update(t, time, ptr, intro) {
+      const w = innerWidth, h = innerHeight;
+      const exit = smooth(0.32, 0.8, t);
+      for (const it of items) {
+        it.pos.set(
+          it.base.x + Math.sin(time * 0.42 + it.seed * 10) * 0.2,
+          it.base.y + Math.cos(time * 0.35 + it.seed * 7) * 0.16,
+          it.base.z,
+        );
+        it.pos.multiplyScalar(1 + exit * 1.3);
+        it.pos.z += exit * 7;
+        it.screen.copy(it.pos).project(camera);
+        // drift away from the cursor
+        if (ptr.active) {
+          const dx = it.screen.x - ptr.rawX, dy = it.screen.y - ptr.rawY;
+          const f = Math.exp(-(dx * dx * (w / h) * (w / h) + dy * dy) * 10);
+          it.pos.x += Math.sign(dx) * f * 0.35; it.pos.y += Math.sign(dy) * f * 0.25;
+        }
+      }
+      const hov = ptr.active && t < 0.3 ? nearest(ptr.rawX, ptr.rawY, w, h) : -1;
+      items.forEach((it, i) => {
+        it.hover += ((i === hov || i === pinned ? 1 : 0) - it.hover) * 0.2;
+        it.sp.position.copy(it.pos);
+        it.sp.scale.setScalar(size * (1 + it.hover * 0.35));
+        it.mat.opacity = intro * (1 - exit) * (0.7 + it.hover * 0.3);
+      });
+      canvas.style.cursor = hov >= 0 ? 'pointer' : '';
+      const want = hov >= 0 ? hov : pinned;
+      if (t >= 0.3) { if (shown >= 0) hide(); return; }
+      // the tag stays open while the pointer is inside it, so its projects can be clicked
+      let overTip = false;
+      if (shown >= 0 && ptr.active) {
+        const r = tip.getBoundingClientRect(), px = (ptr.rawX * 0.5 + 0.5) * w, py = (-ptr.rawY * 0.5 + 0.5) * h;
+        overTip = px >= r.left - 12 && px <= r.right + 12 && py >= r.top - 12 && py <= r.bottom + 12;
+      }
+      if (overTip) { hideAt = 0; return; }
+      if (want >= 0) { show(want, w, h); hideAt = 0; }
+      else if (shown >= 0) {
+        if (!hideAt) hideAt = performance.now() + 250;
+        if (performance.now() > hideAt) { hide(); hideAt = 0; }
+      }
+    },
+    tapAt(x, y) {
+      const w = innerWidth, h = innerHeight;
+      const i = nearest((x / w) * 2 - 1, -((y / h) * 2 - 1), w, h);
+      if (i >= 0) { pinned = i; show(i, w, h); } else hide();
+    },
+    hide,
+  };
+}
+
 // ---------------------------------------------------------------- hero: pixel-block portrait
 // Quadtree blocks from the photo (assets/data/hero-cells.json). The grid fades in over 1.5 s,
 // blocks glitch along rows, and the cursor pushes them away like a field.
-function makeHero(data) {
+function makeHero(data, skills) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x020304);
   const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
@@ -142,10 +259,10 @@ function makeHero(data) {
 
   const N = data.n, cells = data.cells, count = cells.length / 4, U = 7 / N;
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uIntro: { value: 0 }, uExit: { value: 0 }, uCursor: { value: new THREE.Vector3(99, 99, 0) }, uTint: { value: TEAL }, uPhoto: { value: null }, uHas: { value: 0 } },
+    uniforms: { uTime: { value: 0 }, uIntro: { value: 0 }, uExit: { value: 0 }, uCursor: { value: new THREE.Vector3(99, 99, 0) }, uTint: { value: TEAL }, uPhoto: { value: null }, uHas: { value: 0 }, uBreak: { value: 0 } },
     vertexShader: /* glsl */ `
-      attribute float aLum, aSeed, aSize; uniform float uTime, uExit; uniform vec3 uCursor;
-      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush;
+      attribute float aLum, aSeed, aSize; uniform float uTime, uExit, uBreak, uHas; uniform vec3 uCursor;
+      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush, vMono;
       void main(){
         vUv = uv; vLum = aLum; vSeed = aSeed; vB = 0.13 / sqrt(aSize);
         vec4 p = instanceMatrix * vec4(position, 1.0);
@@ -154,20 +271,26 @@ function makeHero(data) {
         vec2 d = ctr.xy - uCursor.xy;
         float f = exp(-dot(d, d) / 0.45) * uCursor.z;
         vPush = f;
+        // the colour photo breaks into blocks from the top as you scroll, and locally under the cursor
+        float edge = uBreak * 1.2 - (0.5 - ctr.y / 7.0) - aSeed * 0.15;
+        vMono = uHas > 0.5 ? max(clamp(edge * 10.0, 0.0, 1.0), smoothstep(0.15, 0.7, f)) : 1.0;
+        p.z += sin(vMono * 3.1416) * 0.3;
         p.xy += normalize(d + 1e-4) * f * 0.35;
         p.z += f * (0.6 + aSeed * 1.2);
         float row = floor(p.y * 7.0), tick = floor(uTime * 7.0);
         float r = fract(sin(row * 91.7 + tick * 13.1) * 4375.5);
-        p.x += step(0.975, r) * (r - 0.987) * 4.0;
+        p.x += step(0.975, r) * (r - 0.987) * 4.0 * vMono;
         p.z += uExit * aSeed * 9.0;
         p.xy *= 1.0 + uExit * aSeed * 0.8;
         gl_Position = projectionMatrix * modelViewMatrix * p;
       }`,
     fragmentShader: /* glsl */ `
-      uniform float uTime, uIntro, uExit, uHas; uniform vec3 uTint; uniform sampler2D uPhoto;
-      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush;
+      uniform float uTime, uIntro, uExit, uHas, uBreak; uniform vec3 uTint; uniform sampler2D uPhoto;
+      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush, vMono;
       void main(){
         if (vSeed > uIntro) discard;
+        vec4 ph = texture2D(uPhoto, vPhoto);
+        if (uHas > 0.5 && vMono < 0.5 && ph.a < 0.5) discard; // clean cut-out edge while in colour
         vec2 e = min(vUv, 1.0 - vUv);
         float border = step(min(e.x, e.y), vB);
         float flick = step(0.997, fract(sin(vSeed * 7123.1 + floor(uTime * 9.0)) * 9123.7));
@@ -178,7 +301,10 @@ function makeHero(data) {
           l = clamp((dot(ph, vec3(0.299, 0.587, 0.114)) - 0.05) / 0.98, 0.0, 1.0);
         }
         vec3 base = mix(uTint * 0.09, mix(uTint, vec3(1.0), 0.66), pow(l, 1.2));
-        vec3 col = mix(base, base * 0.35, border) + flick * 0.7 + vPush * uTint * 0.6;
+        vec3 mono = mix(base, base * 0.35, border) + flick * 0.7 + vPush * uTint * 0.6;
+        vec3 col = mix(ph.rgb * 0.88, mono, vMono);
+        float line = uBreak * 1.2 - (1.0 - vPhoto.y);
+        col += vec3(0.6, 1.0, 1.0) * smoothstep(0.018, 0.0, abs(line)) * step(0.001, uBreak) * step(uBreak, 0.999) * 1.4;
         gl_FragColor = vec4(col * (1.0 - uExit * 0.55), 1.0);
       }`,
   });
@@ -199,13 +325,14 @@ function makeHero(data) {
   const group = new THREE.Group();
   group.add(mesh);
   scene.add(group);
+  const logos = makeLogos(scene, camera, skills);
 
   let dist = 15, lift = 0;
   const born = performance.now() / 1000;
   const ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), hit = new THREE.Vector3();
   const cur = mat.uniforms.uCursor.value;
   return {
-    scene, camera, bloom: [0.45, 0.5, 0.82], edge: 0x000000, vig: 1,
+    scene, camera, bloom: [0.4, 0.5, 0.95], edge: 0x000000, vig: 1, tapAt: (x, y) => logos.tapAt(x, y), leave: () => { logos.hide(); canvas.style.cursor = ''; },
     resize(w, h) {
       camera.aspect = w / h; camera.updateProjectionMatrix();
       const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
@@ -217,7 +344,9 @@ function makeHero(data) {
       // grid reveal: 1.5 s, ease-out
       const k = clamp01((time - born) / 1.5);
       mat.uniforms.uIntro.value = 1 - (1 - k) * (1 - k);
-      mat.uniforms.uExit.value = smooth(0.45, 1, t);
+      logos.update(t, time, ptr, clamp01((time - born - 0.8) / 1.2));
+      mat.uniforms.uBreak.value = clamp01((t - 0.02) / 0.4);
+      mat.uniforms.uExit.value = smooth(0.5, 1, t);
       sphere.material.uniforms.uTime.value = time;
       sphere.rotation.y = time * 0.012 + t * 0.5;
       group.rotation.y = ptr.x * 0.1;
@@ -641,8 +770,12 @@ function renderCard(s) {
 }
 
 function makeCards(section, camera) {
+  // Cards live in their own scene, drawn after the camcorder pass so the text stays sharp;
+  // the group follows the camera every frame, so they still sit in the scene's space.
+  const overlay = new THREE.Scene();
   const group = new THREE.Group();
-  camera.add(group);
+  group.matrixAutoUpdate = false;
+  overlay.add(group);
   const cards = [];
   const panels = [...section.querySelectorAll('.panel.ghost')];
   const build = async () => {
@@ -650,8 +783,8 @@ function makeCards(section, camera) {
       const spec = await readPanel(el);
       const { canvas: cv, regions } = renderCard(spec);
       const tex = new THREE.CanvasTexture(cv);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = 4;
+      tex.colorSpace = THREE.NoColorSpace; // drawn straight to the screen: keep the canvas colours as they are
+      tex.anisotropy = 8;
       const mat = new THREE.ShaderMaterial({
         uniforms: { uMap: { value: tex }, uReveal: { value: 0 }, uFade: { value: 0 }, uHover: { value: 0 }, uAsp: { value: cv.height / cv.width }, uRegion: { value: new THREE.Vector4(2, 2, 2, 2) } },
         transparent: true, depthWrite: false, depthTest: false,
@@ -703,8 +836,12 @@ function makeCards(section, camera) {
   const ready = (document.fonts ? document.fonts.ready : Promise.resolve()).then(build);
   return {
     ready,
+    overlay,
     layout: layoutAll,
     update(t, time, dt, ptr) {
+      camera.updateMatrixWorld();
+      group.matrix.copy(camera.matrixWorld);
+      group.updateMatrixWorld(true);
       for (const cd of cards) {
         const lt = (t - cd.a) / Math.max(0.001, cd.b - cd.a);
         const vis = lt > -0.02 && lt < 1.04;
@@ -723,6 +860,7 @@ function makeCards(section, camera) {
         cd.mat.uniforms.uFade.value = (1 - exit) * smooth(-0.02, 0.06, lt);
         cd.mat.uniforms.uHover.value = cd.hover;
       }
+      group.updateMatrixWorld(true);
     },
     pick(ray) {
       const vis = cards.filter((c) => c.mesh.visible && c.mat.uniforms.uFade.value > 0.6);
@@ -746,7 +884,7 @@ function makeCards(section, camera) {
 
 // ---------------------------------------------------------------- floating symbols
 // Glyphs drifting through a scene; they scatter away from the cursor and brighten near it.
-function makeSymbols(glyphs, count, box) {
+function makeSymbols(glyphs, count, box, bright = 0.32, scale = 1) {
   const cell = 128;
   const c = document.createElement('canvas');
   c.width = cell * glyphs.length; c.height = cell;
@@ -768,7 +906,7 @@ function makeSymbols(glyphs, count, box) {
   geo.setAttribute('aGlyph', new THREE.BufferAttribute(gl, 1));
   geo.setAttribute('aSeed', new THREE.BufferAttribute(sd, 1));
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uMap: { value: tex }, uN: { value: glyphs.length }, uTime: { value: 0 }, uMouse: { value: new THREE.Vector3(9, 9, 0) }, uAsp: { value: 1 }, uSize: { value: 1 } },
+    uniforms: { uMap: { value: tex }, uN: { value: glyphs.length }, uTime: { value: 0 }, uMouse: { value: new THREE.Vector3(9, 9, 0) }, uAsp: { value: 1 }, uSize: { value: 1 }, uBright: { value: bright } },
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     vertexShader: /* glsl */ `attribute float aGlyph, aSeed; uniform float uTime, uAsp, uSize; uniform vec3 uMouse;
       varying float vG, vNear, vSeed;
@@ -781,18 +919,18 @@ function makeSymbols(glyphs, count, box) {
         vNear = f;
         gl_PointSize = uSize * (0.6 + aSeed * 0.9) * (1.0 + f * 0.6) * (24.0 / clip.w);
         gl_Position = clip; }`,
-    fragmentShader: /* glsl */ `uniform sampler2D uMap; uniform float uN, uTime; varying float vG, vNear, vSeed;
+    fragmentShader: /* glsl */ `uniform sampler2D uMap; uniform float uN, uTime, uBright; varying float vG, vNear, vSeed;
       void main(){ vec2 uv = vec2((vG + gl_PointCoord.x) / uN, 1.0 - gl_PointCoord.y);
         float a = texture2D(uMap, uv).a;
         float flick = 0.75 + 0.25 * sin(uTime * (1.0 + vSeed * 3.0) + vSeed * 40.0);
         vec3 col = mix(vec3(0.47, 0.78, 0.78), vec3(1.0), vNear);
-        gl_FragColor = vec4(col * a * (0.32 + vNear * 0.7) * flick, 1.0); }`,
+        gl_FragColor = vec4(col * a * (uBright + vNear * 0.7) * flick, 1.0); }`,
   });
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false;
   return {
     object: pts,
-    resize(w, h) { mat.uniforms.uAsp.value = w / h; mat.uniforms.uSize.value = renderer.getPixelRatio() * (MOBILE ? 1.6 : 2.2); },
+    resize(w, h) { mat.uniforms.uAsp.value = w / h; mat.uniforms.uSize.value = renderer.getPixelRatio() * (MOBILE ? 1.6 : 2.2) * scale; },
     update(time, ptr) {
       mat.uniforms.uTime.value = time;
       const m = mat.uniforms.uMouse.value;
@@ -879,7 +1017,7 @@ function makeNetwork() {
     Math.round(160 * Q + 60), [-8, 8, -5.5, 5.5, -len - 6, 10]);
   scene.add(sym.object);
   return {
-    scene, camera, bloom: [0.8, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready,
+    scene, camera, bloom: [0.8, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready, overlay: cards.overlay,
     resize(w, h) { camera.aspect = w / h; camera.fov = MOBILE ? 72 : 60; camera.updateProjectionMatrix(); cards.layout(); sym.resize(w, h); },
     update(t, time, dt, ptr) {
       nMat.uniforms.uTime.value = time; lMat.uniforms.uTime.value = time;
@@ -977,7 +1115,7 @@ function makeSignals() {
     Math.round(150 * Q + 50), [-12, LEN - 10, -5, 5, -5, 5]);
   scene.add(sym.object);
   return {
-    scene, camera, bloom: [0.9, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready,
+    scene, camera, bloom: [0.9, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready, overlay: cards.overlay,
     resize(w, h) { camera.aspect = w / h; camera.fov = MOBILE ? 66 : 50; camera.updateProjectionMatrix(); cards.layout(); sym.resize(w, h); },
     update(t, time, dt, ptr) {
       sym.update(time, ptr);
@@ -994,7 +1132,7 @@ function makeSignals() {
 // ---------------------------------------------------------------- contact: the portrait, resolved
 // A colour point cloud of the photo assembles, then a scan beam sweeps down and reveals the
 // cleaned-up cut-out photo (assets/portrait-cut.webp) flat and undistorted; the points it passes
-// dissolve upward as sparks. A warm rim light, holographic rings and drifting motes finish it.
+// dissolve upward as sparks; motes drift in the background.
 function makeFinale(data) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x050304);
@@ -1056,10 +1194,7 @@ function makeFinale(data) {
         // freshly scanned lines read as a hologram, then settle into the clean photo
         col *= mix(0.82 + 0.18 * sin(vUv.y * 1100.0 - uTime * 6.0), 1.0, age);
         col = mix(col * vec3(0.55, 1.0, 1.08) + vec3(0.0, 0.07, 0.09), col, age);
-        // warm rim light from the upper right, cool fill from the left
-        float rimR = tx.a * (1.0 - texture2D(uMap, vUv + vec2(0.007, 0.004)).a);
-        float rimL = tx.a * (1.0 - texture2D(uMap, vUv - vec2(0.006, -0.002)).a);
-        col += rimR * vec3(1.0, 0.55, 0.32) * 1.4 + rimL * vec3(0.4, 0.75, 0.8) * 0.8;
+        col *= 0.9; // stays below the bloom threshold: no glow around the photo
         float beam = smoothstep(0.012, 0.0, abs(yTop - uScan)) * step(uScan, 1.0);
         float a = tx.a * shown;
         vec3 outc = col * a + vec3(0.65, 1.0, 1.0) * beam * (0.35 + tx.a * 1.8);
@@ -1069,17 +1204,6 @@ function makeFinale(data) {
   const photo = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), photoMat);
   photo.position.z = 0.05;
   rig.add(photo);
-
-  // holographic rings around the head
-  const rings = [3.1, 3.55, 4.1].map((r, i) => {
-    const m = new THREE.Mesh(new THREE.TorusGeometry(r, 0.012, 6, 240), new THREE.MeshBasicMaterial({
-      color: i === 1 ? new THREE.Color(1.6, 0.75, 0.45) : new THREE.Color(0.55, 1.1, 1.1), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending,
-    }));
-    m.position.set(0, 1.1 - i * 0.5, 0);
-    m.rotation.set(Math.PI / 2 - 0.22 + i * 0.12, 0, i * 0.4);
-    rig.add(m);
-    return m;
-  });
 
   // motes drifting upward
   const nM = Math.round(700 * Q);
@@ -1115,7 +1239,7 @@ function makeFinale(data) {
 
   let dist = 14;
   return {
-    scene, camera, bloom: [0.7, 0.65, 0.82], edge: 0x000000, vig: 1, curve: 0.03,
+    scene, camera, bloom: [0.45, 0.5, 0.97], edge: 0x000000, vig: 1, curve: 0.03,
     resize(w, h) {
       camera.aspect = w / h; camera.updateProjectionMatrix();
       const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
@@ -1126,12 +1250,11 @@ function makeFinale(data) {
     },
     update(t, time, dt, ptr) {
       const assemble = ease(clamp01(t / 0.4));
-      const scan = clamp01((t - 0.36) / 0.36) * 1.08;
+      const scan = clamp01((t - 0.36) / 0.36) * 1.25;
       pMat.uniforms.uTime.value = time; pMat.uniforms.uSpread.value = 1 - assemble; pMat.uniforms.uScan.value = scan;
       photoMat.uniforms.uScan.value = scan; photoMat.uniforms.uTime.value = time;
+      cloud.visible = scan < 1.2; // every point has dissolved by now; none stay on the photo
       mMat.uniforms.uTime.value = time;
-      const ringOn = smooth(0.55, 0.95, t);
-      rings.forEach((r, i) => { r.rotation.z += dt * (0.12 + i * 0.05) * (i % 2 ? -1 : 1); r.material.opacity = ringOn * (0.55 - i * 0.1); });
       const lookY = MOBILE ? -2.6 : Y * 0.6; // phones: face in the top third, text below
       camera.position.set(X * 0.62 + ptr.x * 0.3, 0.15 + lookY + ptr.y * 0.22, dist * (1.18 - 0.18 * assemble));
       camera.lookAt(X * 0.62, lookY, 0);
@@ -1161,11 +1284,13 @@ const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(url
 async function start() {
   tick(0.05);
   const pointsReq = getJSON('assets/data/portrait-points.json');
+  const skillsReq = getJSON('assets/data/skills.json').catch(() => []);
   const cells = await getJSON('assets/data/hero-cells.json'); tick(0.4);
   await Promise.race([document.fonts ? document.fonts.ready : null, new Promise((r) => setTimeout(r, 2500))]); tick(0.55);
   const points = await pointsReq; tick(0.7);
+  const skills = await skillsReq;
 
-  const builders = { hero: () => makeHero(cells), work: makeWork, network: makeNetwork, signals: makeSignals, portrait: () => makeFinale(points) };
+  const builders = { hero: () => makeHero(cells, skills), work: makeWork, network: makeNetwork, signals: makeSignals, portrait: () => makeFinale(points) };
   const SCENES = site.names.map((n) => builders[n]());
   tick(0.9);
 
@@ -1194,6 +1319,7 @@ async function start() {
   canvas.addEventListener('click', (e) => {
     if (downAt && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 8) return; // a drag, not a click
     const S = SCENES[site.idx];
+    if (S.tapAt) { S.tapAt(e.clientX, e.clientY); return; }
     if (!S.pick) return;
     pointer.rawX = (e.clientX / innerWidth) * 2 - 1; pointer.rawY = -((e.clientY / innerHeight) * 2 - 1);
     ray.setFromCamera({ x: pointer.rawX, y: pointer.rawY }, S.camera);
@@ -1235,6 +1361,13 @@ async function start() {
     cam.uniforms.uGlitch.value = Math.min(1, Math.pow(clamp01(1 - d / 0.14), 2) + site.kick * 0.6);
     cam.uniforms.uTime.value = time;
     composer.render(dt);
+    if (S.overlay) {
+      // text cards on top of the finished frame, untouched by bloom and the camcorder pass
+      renderer.autoClear = false;
+      renderer.clearDepth();
+      renderer.render(S.overlay, S.camera);
+      renderer.autoClear = true;
+    }
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
