@@ -119,14 +119,14 @@ composer.addPass(bloom);
 composer.addPass(new OutputPass());
 composer.addPass(cam);
 
-// ---------------------------------------------------------------- hero: floating skill logos
-// Official logos of the skills used in the projects (assets/data/skills.json) drift around the
-// portrait. Hover (or tap) one to see which projects used it, with a small preview of each;
-// clicking a project opens its case study. ~25 sprites and one HTML tag: no measurable cost.
+// ---------------------------------------------------------------- hero: skill constellation
+// Official logos of the skills used in the projects (assets/data/skills.json), each on a small
+// glass tile, laid out across the whole screen: every tile gets its own spot, away from the
+// portrait, the text and each other (measured live, so nothing can overlap). Faint lines join
+// neighbours. Hover (or tap) a tile for the projects that used the skill; clicking one opens it.
 function makeLogos(scene, camera, list) {
   const group = new THREE.Group();
   scene.add(group);
-  const n = list.length;
   const tip = document.createElement('div');
   tip.className = 'skill-tip';
   tip.setAttribute('role', 'tooltip');
@@ -134,44 +134,114 @@ function makeLogos(scene, camera, list) {
   document.body.appendChild(tip);
   let shown = -1, pinned = -1, hideAt = 0;
 
-  // spread the logos evenly over the parts of the ring that are free of text
-  // (desktop: the name sits left, the tagline right; phones: tagline on top, name below)
-  const gaps = MOBILE ? [[Math.PI / 2, 0.55], [-Math.PI / 2, 1.0]] : [[Math.PI, 0.55], [0, 0.32], [-Math.PI / 2, 0.62]];
-  const free = (a) => gaps.every(([c, r]) => Math.abs(Math.atan2(Math.sin(a - c), Math.cos(a - c))) > r);
-  const angles = [];
-  for (let k = 0; k < 720 && angles.length < 720; k++) { const a = (k / 720) * Math.PI * 2; if (free(a)) angles.push(a); }
-  const pick = (i) => angles[Math.floor(((i + 0.5) / n) * angles.length)];
-  const items = list.map((sk, i) => {
+  const items = list.map((sk) => {
     const c = document.createElement('canvas');
-    c.width = c.height = 128;
+    c.width = c.height = 160;
+    const g = c.getContext('2d');
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
+    const tile = () => {
+      g.clearRect(0, 0, 160, 160);
+      g.fillStyle = 'rgba(6, 13, 15, 0.86)';
+      g.strokeStyle = 'rgba(121, 199, 199, 0.55)';
+      g.lineWidth = 3;
+      g.beginPath(); g.roundRect(6, 6, 148, 148, 26); g.fill(); g.stroke();
+    };
+    tile();
     const img = new Image();
-    img.onload = () => { const g = c.getContext('2d'); g.clearRect(0, 0, 128, 128); g.drawImage(img, 16, 16, 96, 96); tex.needsUpdate = true; };
+    img.onload = () => { tile(); g.drawImage(img, 36, 36, 88, 88); tex.needsUpdate = true; };
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(sk.svg);
-    // drawn after the portrait and never depth-tested against it, so no logo hides behind the photo
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false, opacity: 0 });
     const sp = new THREE.Sprite(mat);
     sp.renderOrder = 20;
     group.add(sp);
-    // an ellipse around the portrait, wider than the face so nothing sits on it
-    const a = pick(i) + rand(-0.03, 0.03);
-    const rx = (MOBILE ? 3.3 : 6.5) + rand(-0.5, 0.6), ry = (MOBILE ? 5.0 : 3.9) + rand(-0.4, 0.4);
-    const base = new THREE.Vector3(Math.cos(a) * rx, Math.sin(a) * ry + (MOBILE ? 0.6 : 0), rand(-3.2, -0.6));
-    const orbit = { a, rx, ry, sp: rand(0.6, 1.4) };
     const html = `<b>${sk.name}</b><small>used in</small><ul>` + sk.projects.map((p) =>
       `<li><button type="button" data-case="${p.id}"><img src="${p.img}" alt="" width="64" height="40" loading="lazy" decoding="async"><span>${p.name}</span></button></li>`).join('') + '</ul>';
-    return { sp, mat, base, orbit, seed: rand(), hover: 0, html, pos: new THREE.Vector3(), screen: new THREE.Vector3(), vis: 1 };
+    return { sp, mat, html, seed: rand(), hover: 0, on: false, order: 0, base: new THREE.Vector3(), pos: new THREE.Vector3(), screen: new THREE.Vector3(), sx: 0, sy: 0 };
   });
 
-  const size = MOBILE ? 0.62 : 0.72;
+  // constellation lines between neighbouring tiles
+  const lineGeo = new THREE.BufferGeometry();
+  const lineMat = new THREE.LineBasicMaterial({ color: TEAL, transparent: true, opacity: 0, depthTest: false, depthWrite: false });
+  const lines = new THREE.LineSegments(lineGeo, lineMat);
+  lines.renderOrder = 19;
+  group.add(lines);
+  let edges = [];
+
+  let tilePx = 56, worldSize = 0.7;
+  const rest = new THREE.PerspectiveCamera();
+  const ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), hit = new THREE.Vector3();
+
+  // place tiles on free screen spots (Poisson-disc style), using the camera at rest
+  function layout(w, h, dist, lift) {
+    rest.copy(camera); rest.position.set(0, -lift, dist); rest.lookAt(0, -lift, 0); rest.updateMatrixWorld();
+    tilePx = MOBILE ? 34 : Math.round(Math.min(64, Math.max(48, w / 26)));
+    const pad = tilePx * 0.5 + (MOBILE ? 8 : 14);
+    const blocked = [];
+    const add = (r, m = MOBILE ? 8 : 18) => { if (r && r.width > 0) blocked.push({ l: r.left - m, t: r.top - m, r: r.right + m, b: r.bottom + m }); };
+    document.querySelectorAll('#top .panel, .hud').forEach((el) => add(el.getBoundingClientRect()));
+    // the portrait's silhouette: head narrower than the shoulders
+    const toScreen = (x, y) => { const v = new THREE.Vector3(x, y, 0).project(rest); return [(v.x * 0.5 + 0.5) * w, (-v.y * 0.5 + 0.5) * h]; };
+    [[-2.5, 3.6, 2.5, -0.4], [-3.75, -0.4, 3.75, -3.7]].forEach(([x0, y0, x1, y1]) => {
+      const [l, t] = toScreen(x0, y0), [r, b] = toScreen(x1, y1);
+      const m = MOBILE ? 6 : 16;
+      blocked.push({ l: l - m, t: t - m, r: r + m, b: b + m });
+    });
+    const free = (x, y) => x > pad && x < w - pad && y > pad && y < h - pad &&
+      blocked.every((q) => x + tilePx / 2 < q.l || x - tilePx / 2 > q.r || y + tilePx / 2 < q.t || y - tilePx / 2 > q.b);
+    // jittered grid of candidates, deterministic
+    let r0 = 98765;
+    const rnd = () => { r0 = (r0 * 16807) % 2147483647; return r0 / 2147483647; };
+    const cell = tilePx * 1.35, cand = [];
+    for (let y = cell / 2; y < h; y += cell) for (let x = cell / 2; x < w; x += cell) {
+      const px = x + (rnd() - 0.5) * cell * 0.5, py = y + (rnd() - 0.5) * cell * 0.5;
+      if (free(px, py)) cand.push([px, py, rnd()]);
+    }
+    cand.sort((a, b) => a[2] - b[2]);
+    // greedy: keep the largest spacing that still fits every tile
+    let picked = [];
+    for (let minD = tilePx * 2.6; minD >= tilePx * (MOBILE ? 1.12 : 1.25); minD *= 0.92) {
+      picked = [];
+      for (const c of cand) {
+        if (picked.every((p) => Math.hypot(p[0] - c[0], p[1] - c[1]) >= minD)) picked.push(c);
+        if (picked.length === items.length) break;
+      }
+      if (picked.length === items.length) break;
+    }
+    const cx = w / 2, cy = h / 2;
+    items.forEach((it, i) => {
+      it.on = i < picked.length;
+      if (!it.on) { it.sp.visible = false; return; }
+      it.sp.visible = true;
+      const [px, py] = picked[i];
+      it.sx = px; it.sy = py;
+      it.order = Math.hypot(px - cx, py - cy) / Math.hypot(cx, cy); // tiles appear from the centre outward
+      const z = rand(-1.2, 1.2);
+      plane.constant = -z;
+      ray.setFromCamera({ x: (px / w) * 2 - 1, y: -((py / h) * 2 - 1) }, rest);
+      ray.ray.intersectPlane(plane, hit);
+      it.base.copy(hit);
+      const d = rest.position.distanceTo(hit);
+      it.size = (tilePx / h) * 2 * d * Math.tan(THREE.MathUtils.degToRad(rest.fov / 2));
+    });
+    // join each tile to its two nearest neighbours
+    const on = items.filter((it) => it.on);
+    const set = new Set();
+    edges = [];
+    on.forEach((a, i) => {
+      on.map((b, j) => [j, Math.hypot(a.sx - b.sx, a.sy - b.sy)]).filter(([j]) => j !== i).sort((p, q) => p[1] - q[1]).slice(0, 2)
+        .forEach(([j, dd]) => { const k = i < j ? `${i}-${j}` : `${j}-${i}`; if (dd < tilePx * 5 && !set.has(k)) { set.add(k); edges.push([a, on[j]]); } });
+    });
+    lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(edges.length * 6), 3));
+  }
+
   function show(i, w, h) {
     if (i !== shown) { tip.innerHTML = items[i].html; shown = i; }
     tip.hidden = false;
     const s = items[i].screen;
     const x = (s.x * 0.5 + 0.5) * w, y = (-s.y * 0.5 + 0.5) * h;
-    const tw = tip.offsetWidth, th = tip.offsetHeight;
-    const left = x + 30 + tw > w - 8 ? x - 30 - tw : x + 30;
+    const tw = tip.offsetWidth, th = tip.offsetHeight, off = tilePx * 0.6 + 12;
+    const left = x + off + tw > w - 8 ? x - off - tw : x + off;
     tip.style.left = Math.max(8, left) + 'px';
     tip.style.top = Math.min(h - th - 8, Math.max(8, y - th / 2)) + 'px';
     requestAnimationFrame(() => tip.classList.add('on'));
@@ -179,59 +249,62 @@ function makeLogos(scene, camera, list) {
   function hide() { tip.classList.remove('on'); tip.hidden = true; shown = -1; pinned = -1; }
   function nearest(px, py, w, h) {
     let best = -1, bd = 1e9;
-    const r = (size / (2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)))) * h * 0.75 + 8;
     items.forEach((it, i) => {
-      if (it.vis < 0.5) return;
-      const dx = (it.screen.x - px) * w / 2, dy = (it.screen.y - py) * h / 2, d = Math.hypot(dx, dy);
-      if (d < r && d < bd) { bd = d; best = i; }
+      if (!it.on || it.mat.opacity < 0.3) return;
+      const d = Math.hypot((it.screen.x - px) * w / 2, (it.screen.y - py) * h / 2);
+      if (d < tilePx * 0.62 && d < bd) { bd = d; best = i; }
     });
     return best;
   }
 
   return {
+    layout,
     update(t, time, ptr, intro) {
       const w = innerWidth, h = innerHeight;
-      const exit = smooth(0.32, 0.8, t);
+      const exit = smooth(0.3, 0.75, t);
       for (const it of items) {
-        // the ring orbits slowly; each logo also bobs, drifts in depth and tilts on its own rhythm
-        const o = it.orbit, sd = it.seed * 10;
-        const ang = o.a + time * 0.045 + Math.sin(time * 0.3 * o.sp + sd) * 0.12;
+        if (!it.on) continue;
+        const sd = it.seed * 10;
         it.pos.set(
-          Math.cos(ang) * o.rx + Math.sin(time * 0.55 * o.sp + sd) * 0.35,
-          Math.sin(ang) * o.ry + (MOBILE ? 0.6 : 0) + Math.cos(time * 0.47 * o.sp + sd * 1.3) * 0.32,
-          it.base.z + Math.sin(time * 0.4 * o.sp + sd * 0.7) * 0.9,
+          it.base.x + Math.sin(time * 0.5 + sd) * it.size * 0.12,
+          it.base.y + Math.cos(time * 0.42 + sd * 1.3) * it.size * 0.14,
+          it.base.z,
         );
-        it.sp.material.rotation = Math.sin(time * 0.6 * o.sp + sd) * 0.22;
-        // fade while passing behind the name or the tagline
-        const gap = Math.min(...gaps.map(([c, r]) => { const d = Math.abs(Math.atan2(Math.sin(ang - c), Math.cos(ang - c))); return smooth(r - 0.05, r + 0.3, d); }));
-        it.vis = gap;
-        it.pos.multiplyScalar(1 + exit * 1.3);
-        it.pos.z += exit * 7;
+        // on scroll the constellation spreads out toward the camera
+        it.pos.x *= 1 + exit * 0.9; it.pos.y *= 1 + exit * 0.9; it.pos.z += exit * 6;
         it.screen.copy(it.pos).project(camera);
-        // drift away from the cursor
         if (ptr.active) {
           const dx = it.screen.x - ptr.rawX, dy = it.screen.y - ptr.rawY;
-          const f = Math.exp(-(dx * dx * (w / h) * (w / h) + dy * dy) * 10);
-          it.pos.x += Math.sign(dx) * f * 0.35; it.pos.y += Math.sign(dy) * f * 0.25;
+          const f = Math.exp(-(dx * dx * (w / h) * (w / h) + dy * dy) * 16);
+          it.pos.x += Math.sign(dx) * f * it.size * 0.25; it.pos.y += Math.sign(dy) * f * it.size * 0.25;
         }
       }
-      const hov = ptr.active && t < 0.3 ? nearest(ptr.rawX, ptr.rawY, w, h) : -1;
+      const hov = ptr.active && t < 0.28 ? nearest(ptr.rawX, ptr.rawY, w, h) : -1;
       items.forEach((it, i) => {
+        if (!it.on) return;
         it.hover += ((i === hov || i === pinned ? 1 : 0) - it.hover) * 0.2;
+        const appear = smooth(it.order * 0.7, it.order * 0.7 + 0.3, intro);
         it.sp.position.copy(it.pos);
-        it.sp.scale.setScalar(size * (1 + it.hover * 0.35));
-        it.mat.opacity = intro * (1 - exit) * (0.7 + it.hover * 0.3) * it.vis;
+        it.sp.scale.setScalar(it.size * (0.6 + appear * 0.4) * (1 + it.hover * 0.22));
+        it.mat.rotation = Math.sin(time * 0.6 + it.seed * 9) * 0.06;
+        it.mat.opacity = appear * (1 - exit) * (0.82 + it.hover * 0.18);
       });
+      // lines follow the tiles; brighter when one end is hovered
+      const arr = lineGeo.attributes.position ? lineGeo.attributes.position.array : null;
+      if (arr) {
+        edges.forEach(([a, b], k) => { arr.set([a.pos.x, a.pos.y, a.pos.z, b.pos.x, b.pos.y, b.pos.z], k * 6); });
+        lineGeo.attributes.position.needsUpdate = true;
+        lineMat.opacity = smooth(0.6, 1, intro) * (1 - exit) * (0.16 + (hov >= 0 ? 0.12 : 0));
+      }
       canvas.style.cursor = hov >= 0 ? 'pointer' : '';
-      const want = hov >= 0 ? hov : pinned;
-      if (t >= 0.3) { if (shown >= 0) hide(); return; }
-      // the tag stays open while the pointer is inside it, so its projects can be clicked
+      if (t >= 0.28) { if (shown >= 0) hide(); return; }
       let overTip = false;
       if (shown >= 0 && ptr.active) {
         const r = tip.getBoundingClientRect(), px = (ptr.rawX * 0.5 + 0.5) * w, py = (-ptr.rawY * 0.5 + 0.5) * h;
         overTip = px >= r.left - 12 && px <= r.right + 12 && py >= r.top - 12 && py <= r.bottom + 12;
       }
       if (overTip) { hideAt = 0; return; }
+      const want = hov >= 0 ? hov : pinned;
       if (want >= 0) { show(want, w, h); hideAt = 0; }
       else if (shown >= 0) {
         if (!hideAt) hideAt = performance.now() + 250;
@@ -349,6 +422,7 @@ function makeHero(data, skills) {
       const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
       dist = Math.max(3.5 / tan / 0.86, 3.5 / (tan * camera.aspect) / (MOBILE ? 1.05 : 0.95));
       lift = MOBILE ? 0.9 : 0;
+      logos.layout(w, h, dist, lift);
     },
     update(t, time, dt, ptr) {
       mat.uniforms.uTime.value = time;
