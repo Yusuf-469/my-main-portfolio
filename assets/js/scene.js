@@ -185,7 +185,7 @@ function makeHero(data) {
         }
         vec3 base = mix(uTint * 0.09, mix(uTint, vec3(1.0), 0.66), pow(l, 1.2));
         vec3 mono = mix(base, base * 0.35, border) + flick * 0.7 + vPush * uTint * 0.6;
-        vec3 col = mix(ph.rgb * 0.94, mono, vMono);
+        vec3 col = mix(ph.rgb * 0.88, mono, vMono);
         float line = uBreak * 1.2 - (1.0 - vPhoto.y);
         col += vec3(0.6, 1.0, 1.0) * smoothstep(0.018, 0.0, abs(line)) * step(0.001, uBreak) * step(uBreak, 0.999) * 1.4;
         gl_FragColor = vec4(col * (1.0 - uExit * 0.55), 1.0);
@@ -208,21 +208,26 @@ function makeHero(data) {
   const group = new THREE.Group();
   group.add(mesh);
   scene.add(group);
+  const sym = makeSymbols(['</>', '{ }', 'λ', 'Σ', '∇', 'AI', 'ML', 'py', 'js', '01', '→', '#', '∂', 'f(x)', '[ ]', '=>'],
+    Math.round(60 * Q + 26), [-11, 11, -6.5, 6.5, -6, -0.8], 0.75, 10.5); // behind and around the portrait, never over the face
+  scene.add(sym.object);
 
   let dist = 15, lift = 0;
   const born = performance.now() / 1000;
   const ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), hit = new THREE.Vector3();
   const cur = mat.uniforms.uCursor.value;
   return {
-    scene, camera, bloom: [0.45, 0.5, 0.82], edge: 0x000000, vig: 1,
+    scene, camera, bloom: [0.4, 0.5, 0.95], edge: 0x000000, vig: 1,
     resize(w, h) {
       camera.aspect = w / h; camera.updateProjectionMatrix();
       const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
       dist = Math.max(3.5 / tan / 0.86, 3.5 / (tan * camera.aspect) / (MOBILE ? 1.05 : 0.95));
       lift = MOBILE ? 0.9 : 0;
+      sym.resize(w, h);
     },
     update(t, time, dt, ptr) {
       mat.uniforms.uTime.value = time;
+      sym.update(time, ptr);
       // grid reveal: 1.5 s, ease-out
       const k = clamp01((time - born) / 1.5);
       mat.uniforms.uIntro.value = 1 - (1 - k) * (1 - k);
@@ -756,7 +761,7 @@ function makeCards(section, camera) {
 
 // ---------------------------------------------------------------- floating symbols
 // Glyphs drifting through a scene; they scatter away from the cursor and brighten near it.
-function makeSymbols(glyphs, count, box) {
+function makeSymbols(glyphs, count, box, bright = 0.32, scale = 1) {
   const cell = 128;
   const c = document.createElement('canvas');
   c.width = cell * glyphs.length; c.height = cell;
@@ -778,7 +783,7 @@ function makeSymbols(glyphs, count, box) {
   geo.setAttribute('aGlyph', new THREE.BufferAttribute(gl, 1));
   geo.setAttribute('aSeed', new THREE.BufferAttribute(sd, 1));
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uMap: { value: tex }, uN: { value: glyphs.length }, uTime: { value: 0 }, uMouse: { value: new THREE.Vector3(9, 9, 0) }, uAsp: { value: 1 }, uSize: { value: 1 } },
+    uniforms: { uMap: { value: tex }, uN: { value: glyphs.length }, uTime: { value: 0 }, uMouse: { value: new THREE.Vector3(9, 9, 0) }, uAsp: { value: 1 }, uSize: { value: 1 }, uBright: { value: bright } },
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     vertexShader: /* glsl */ `attribute float aGlyph, aSeed; uniform float uTime, uAsp, uSize; uniform vec3 uMouse;
       varying float vG, vNear, vSeed;
@@ -791,18 +796,18 @@ function makeSymbols(glyphs, count, box) {
         vNear = f;
         gl_PointSize = uSize * (0.6 + aSeed * 0.9) * (1.0 + f * 0.6) * (24.0 / clip.w);
         gl_Position = clip; }`,
-    fragmentShader: /* glsl */ `uniform sampler2D uMap; uniform float uN, uTime; varying float vG, vNear, vSeed;
+    fragmentShader: /* glsl */ `uniform sampler2D uMap; uniform float uN, uTime, uBright; varying float vG, vNear, vSeed;
       void main(){ vec2 uv = vec2((vG + gl_PointCoord.x) / uN, 1.0 - gl_PointCoord.y);
         float a = texture2D(uMap, uv).a;
         float flick = 0.75 + 0.25 * sin(uTime * (1.0 + vSeed * 3.0) + vSeed * 40.0);
         vec3 col = mix(vec3(0.47, 0.78, 0.78), vec3(1.0), vNear);
-        gl_FragColor = vec4(col * a * (0.32 + vNear * 0.7) * flick, 1.0); }`,
+        gl_FragColor = vec4(col * a * (uBright + vNear * 0.7) * flick, 1.0); }`,
   });
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false;
   return {
     object: pts,
-    resize(w, h) { mat.uniforms.uAsp.value = w / h; mat.uniforms.uSize.value = renderer.getPixelRatio() * (MOBILE ? 1.6 : 2.2); },
+    resize(w, h) { mat.uniforms.uAsp.value = w / h; mat.uniforms.uSize.value = renderer.getPixelRatio() * (MOBILE ? 1.6 : 2.2) * scale; },
     update(time, ptr) {
       mat.uniforms.uTime.value = time;
       const m = mat.uniforms.uMouse.value;
@@ -1066,10 +1071,7 @@ function makeFinale(data) {
         // freshly scanned lines read as a hologram, then settle into the clean photo
         col *= mix(0.82 + 0.18 * sin(vUv.y * 1100.0 - uTime * 6.0), 1.0, age);
         col = mix(col * vec3(0.55, 1.0, 1.08) + vec3(0.0, 0.07, 0.09), col, age);
-        // warm rim light from the upper right, cool fill from the left
-        float rimR = tx.a * (1.0 - texture2D(uMap, vUv + vec2(0.007, 0.004)).a);
-        float rimL = tx.a * (1.0 - texture2D(uMap, vUv - vec2(0.006, -0.002)).a);
-        col += rimR * vec3(1.0, 0.55, 0.32) * 1.4 + rimL * vec3(0.4, 0.75, 0.8) * 0.8;
+        col *= 0.9; // stays below the bloom threshold: no glow around the photo
         float beam = smoothstep(0.012, 0.0, abs(yTop - uScan)) * step(uScan, 1.0);
         float a = tx.a * shown;
         vec3 outc = col * a + vec3(0.65, 1.0, 1.0) * beam * (0.35 + tx.a * 1.8);
@@ -1125,7 +1127,7 @@ function makeFinale(data) {
 
   let dist = 14;
   return {
-    scene, camera, bloom: [0.7, 0.65, 0.82], edge: 0x000000, vig: 1, curve: 0.03,
+    scene, camera, bloom: [0.45, 0.5, 0.97], edge: 0x000000, vig: 1, curve: 0.03,
     resize(w, h) {
       camera.aspect = w / h; camera.updateProjectionMatrix();
       const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
@@ -1136,9 +1138,10 @@ function makeFinale(data) {
     },
     update(t, time, dt, ptr) {
       const assemble = ease(clamp01(t / 0.4));
-      const scan = clamp01((t - 0.36) / 0.36) * 1.08;
+      const scan = clamp01((t - 0.36) / 0.36) * 1.25;
       pMat.uniforms.uTime.value = time; pMat.uniforms.uSpread.value = 1 - assemble; pMat.uniforms.uScan.value = scan;
       photoMat.uniforms.uScan.value = scan; photoMat.uniforms.uTime.value = time;
+      cloud.visible = scan < 1.2; // every point has dissolved by now; none stay on the photo
       mMat.uniforms.uTime.value = time;
       const ringOn = smooth(0.55, 0.95, t);
       rings.forEach((r, i) => { r.rotation.z += dt * (0.12 + i * 0.05) * (i % 2 ? -1 : 1); r.material.opacity = ringOn * (0.55 - i * 0.1); });
