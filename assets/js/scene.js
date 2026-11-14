@@ -398,6 +398,397 @@ function makeWork() {
 }
 
 
+// ---------------------------------------------------------------- floating text cards
+// The written panels of a section (.panel.ghost in the HTML) are drawn onto canvases and float in
+// front of the camera: each decodes in block by block as it flies in, drifts and tilts with the
+// mouse, and its links light up on hover and act on click. The HTML stays the source of the text.
+const F_D = '"Doto", ui-monospace, monospace';
+const F_M = '"IBM Plex Mono", ui-monospace, monospace';
+const C_INK = '#eef4f4', C_INK2 = '#b9c7c9', C_INK3 = '#8b9a9c', C_TEAL = '#79c7c7', C_LIVE = '#2bff5e', C_AWS = '#ff9900';
+const txt = (el, sel) => { const n = sel ? el.querySelector(sel) : el; return n ? n.textContent.replace(/\s+/g, ' ').trim() : ''; };
+
+function wrapLines(g, text, maxW) {
+  const out = []; let cur = '';
+  for (const w of text.split(/\s+/).filter(Boolean)) {
+    const t = cur ? cur + ' ' + w : w;
+    if (cur && g.measureText(t).width > maxW) { out.push(cur); cur = w; } else cur = t;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+async function readPanel(el) {
+  const kind = el.dataset.card;
+  const [a, b] = el.dataset.at.split(',').map(Number);
+  const s = { kind, a, b, label: txt(el, '.label') };
+  if (kind === 'statement') {
+    s.text = txt(el, '.statement');
+    s.stats = [...el.querySelectorAll('.stats > div')].map((d) => [txt(d, 'b'), txt(d, 'span')]);
+    s.small = txt(el, '.small');
+  } else if (kind === 'steps') {
+    s.lede = txt(el, '.lede');
+    s.items = [...el.querySelectorAll('.steps > li')].map((li) => ({
+      num: txt(li, '.num'), title: txt(li, 'h3'), text: txt(li, 'p'),
+      links: [...li.querySelectorAll('[data-case]')].map((b) => ({ label: b.textContent.trim(), action: { case: b.dataset.case } })),
+    }));
+  } else if (kind === 'summary') {
+    s.prompt = txt(el, '.prompt'); s.sub = txt(el, '.term-h'); s.foot = txt(el, '.term-foot');
+    s.rows = [...el.querySelectorAll('tbody tr')].map((tr) => {
+      const th = tr.querySelector('th');
+      return { name: th.firstChild.textContent.trim(), type: txt(th, 'i'), w: txt(tr, 'td') };
+    });
+  } else if (kind === 'git') {
+    s.prompt = txt(el, '.prompt'); s.meta = txt(el, '.meta-line'); s.title = txt(el, 'h3'); s.text = txt(el, '.small');
+    s.diff = [...el.querySelectorAll('.diff li')].map((li) => txt(li));
+    s.chips = [...el.querySelectorAll('.chips li')].map((li) => txt(li));
+    s.links = [...el.querySelectorAll('.see [data-case], .see a')].map((n) => ({ label: n.textContent.trim(), action: n.dataset.case ? { case: n.dataset.case } : { href: n.href } }));
+  } else if (kind === 'years') {
+    s.items = await Promise.all([...el.querySelectorAll('.years > li')].map(async (li) => {
+      const img = li.querySelector('img');
+      let pic = null;
+      if (img) { const im = new Image(); im.src = img.src; try { await im.decode(); pic = im; } catch (e) { pic = null; } }
+      return { yr: txt(li, '.yr'), title: txt(li, 'h3'), text: txt(li, 'p'), pic, mono: txt(li, '.mono-logo') };
+    }));
+  } else if (kind === 'cert') {
+    s.k = txt(el, '.cert-k'); s.name = txt(el, '.cert-name'); s.who = txt(el, '.cert-who');
+    s.meta = [...el.querySelectorAll('.cert-meta > div')].map((d) => [txt(d, 'dt'), txt(d, 'dd')]);
+    const a = el.querySelector('a');
+    s.links = a ? [{ label: a.textContent.trim(), action: { href: a.href } }] : [];
+  }
+  return s;
+}
+
+function renderCard(s) {
+  const W = MOBILE ? 760 : 960, P = MOBILE ? 46 : 52;
+  const c = document.createElement('canvas');
+  const g = c.getContext('2d');
+  const regions = [];
+  const draw = (dry) => {
+    let y = P;
+    const set = (w, size, fam = F_M, ls = 0) => { g.font = `${w} ${size}px ${fam}`; g.letterSpacing = ls + 'px'; };
+    const put = (str, x, base, col) => { if (!dry) { g.fillStyle = col; g.fillText(str, x, base); } };
+    const para = (str, size, col, { x = P, w = W - 2 * P, weight = 400, lh = 1.5, fam = F_M, ls = 0, upper = false } = {}) => {
+      set(weight, size, fam, ls);
+      for (const line of wrapLines(g, upper ? str.toUpperCase() : str, w)) { put(line, x, y + size * 0.8, col); y += size * lh; }
+    };
+    const label = (str) => { if (!str) return; para(str, 21, C_INK3, { weight: 500, ls: 4, upper: true }); y += 10; };
+    const links = (list) => {
+      if (!list || !list.length) return;
+      set(600, 22, F_M, 2);
+      let x = P;
+      const h = 44;
+      for (const l of list) {
+        const t = `> ${l.label.toUpperCase()}` + (l.action.href ? ' ↗' : '');
+        const w = g.measureText(t).width;
+        if (x + w > W - P) { x = P; y += h + 6; }
+        if (!dry) {
+          g.strokeStyle = 'rgba(121,199,199,.55)'; g.lineWidth = 1.5; g.strokeRect(x - 10, y, w + 20, h);
+          g.fillStyle = C_TEAL; g.fillText(t, x, y + 29);
+        }
+        regions.push({ x0: x - 10, y0: y, x1: x + w + 10, y1: y + h, action: l.action });
+        x += w + 36;
+      }
+      y += h + 4;
+    };
+    if (!dry) {
+      g.fillStyle = 'rgba(2, 8, 9, 0.8)';
+      g.fillRect(0, 0, W, c.height);
+      g.strokeStyle = C_TEAL; g.lineWidth = 3;
+      const L = 34, H = c.height;
+      [[0, 0, 1, 1], [W, 0, -1, 1], [0, H, 1, -1], [W, H, -1, -1]].forEach(([x, yy, sx, sy]) => {
+        g.beginPath(); g.moveTo(x + sx * L, yy + sy * 1.5); g.lineTo(x + sx * 1.5, yy + sy * 1.5); g.lineTo(x + sx * 1.5, yy + sy * L); g.stroke();
+      });
+    }
+    if (s.kind === 'statement') {
+      label(s.label);
+      para(s.text, MOBILE ? 31 : 33, C_INK, { lh: 1.45 });
+      y += 18;
+      const colW = (W - 2 * P) / s.stats.length, top = y;
+      let bottom = y;
+      s.stats.forEach(([n, cap], i) => {
+        y = top;
+        para(n, 86, C_TEAL, { x: P + i * colW, w: colW - 20, weight: 900, fam: F_D, lh: 1.0 });
+        para(cap, 19, C_INK2, { x: P + i * colW, w: colW - 24, weight: 500, ls: 2, upper: true, lh: 1.4 });
+        bottom = Math.max(bottom, y);
+      });
+      y = bottom + 16;
+      para(s.small, 23, C_INK2);
+    } else if (s.kind === 'steps') {
+      label(s.label);
+      if (s.lede) { para(s.lede, 25, C_INK2); y += 14; }
+      const NX = MOBILE ? 118 : 150;
+      s.items.forEach((it) => {
+        const top = y;
+        set(900, MOBILE ? 84 : 100, F_D);
+        if (!dry) { g.strokeStyle = C_TEAL; g.lineWidth = 2; g.strokeText(it.num, P, top + (MOBILE ? 70 : 82)); }
+        para(it.title, 31, C_INK, { x: P + NX, w: W - 2 * P - NX, weight: 600, lh: 1.3 });
+        y += 4;
+        para(it.text, 23, C_INK2, { x: P + NX, w: W - 2 * P - NX, lh: 1.5 });
+        y += 8;
+        const x0 = P + NX;
+        set(600, 20, F_M, 2);
+        let x = x0;
+        it.links.forEach((l) => {
+          const t = `> ${l.label.toUpperCase()}`, w = g.measureText(t).width;
+          if (!dry) { g.fillStyle = C_TEAL; g.fillText(t, x, y + 24); }
+          regions.push({ x0: x - 8, y0: y - 6, x1: x + w + 8, y1: y + 36, action: l.action });
+          x += w + 30;
+        });
+        y = Math.max(y + 46, top + 110);
+      });
+    } else if (s.kind === 'summary') {
+      para(s.prompt, 29, C_LIVE, { weight: 600 });
+      if (s.sub) para(s.sub, 21, C_INK2);
+      y += 10;
+      const NX = MOBILE ? 250 : 320;
+      if (!dry) { g.fillStyle = 'rgba(238,244,244,.3)'; g.fillRect(P, y, W - 2 * P, 1.5); }
+      y += 14;
+      s.rows.forEach((r) => {
+        const top = y;
+        para(r.name, 25, C_TEAL, { weight: 600, w: NX - 20 });
+        para(r.type, 20, C_INK3, { w: NX - 20 });
+        const left = y; y = top;
+        para(r.w, 23, C_INK, { x: P + NX, w: W - 2 * P - NX, lh: 1.5 });
+        y = Math.max(y, left) + 12;
+        if (!dry) { g.setLineDash([6, 6]); g.strokeStyle = 'rgba(238,244,244,.22)'; g.lineWidth = 1; g.beginPath(); g.moveTo(P, y - 6); g.lineTo(W - P, y - 6); g.stroke(); g.setLineDash([]); }
+        y += 8;
+      });
+      if (s.foot) para(s.foot, 21, C_INK2);
+    } else if (s.kind === 'git') {
+      para(s.prompt, 27, C_LIVE, { weight: 600 });
+      para(s.meta, 21, C_INK2, { ls: 1 });
+      y += 6;
+      para(s.title, MOBILE ? 36 : 40, C_INK, { weight: 600, lh: 1.25 });
+      y += 4;
+      para(s.text, 23, C_INK2);
+      y += 6;
+      s.diff.forEach((d) => {
+        set(700, 23); put('+', P, y + 18, C_LIVE);
+        para(d, 22, C_INK2, { x: P + 26, w: W - 2 * P - 26, lh: 1.45 });
+        y += 4;
+      });
+      y += 6;
+      set(500, 20, F_M, 1);
+      let x = P;
+      s.chips.forEach((ch) => {
+        const w = g.measureText(ch).width + 22;
+        if (x + w > W - P) { x = P; y += 42; }
+        if (!dry) { g.strokeStyle = 'rgba(238,244,244,.4)'; g.lineWidth = 1.2; g.strokeRect(x, y, w, 34); g.fillStyle = C_INK; g.fillText(ch, x + 11, y + 23); }
+        x += w + 10;
+      });
+      y += 52;
+      links(s.links);
+    } else if (s.kind === 'years') {
+      label('education');
+      const YX = MOBILE ? 120 : 150, LX = YX + 70;
+      s.items.forEach((it) => {
+        const top = y;
+        set(900, MOBILE ? 50 : 60, F_D); put(it.yr, P, top + 46, C_TEAL);
+        if (!dry) {
+          g.fillStyle = '#fff'; g.fillRect(P + YX, top, 54, 54);
+          if (it.pic) g.drawImage(it.pic, P + YX + 4, top + 4, 46, 46);
+          else { set(900, 22, F_D); g.fillStyle = '#0b0d0e'; g.fillText(it.mono, P + YX + 12, top + 35); }
+        }
+        para(it.title, 28, C_INK, { x: P + LX, w: W - 2 * P - LX, weight: 600, lh: 1.25 });
+        para(it.text, 21, C_INK2, { x: P + LX, w: W - 2 * P - LX, lh: 1.45 });
+        y = Math.max(y, top + 64) + 22;
+      });
+    } else if (s.kind === 'cert') {
+      label(s.label);
+      if (!dry) {
+        g.fillStyle = C_AWS; g.beginPath();
+        const cx = P + 9, cy = y + 13;
+        for (let k = 0; k < 6; k++) { const a = Math.PI / 3 * k + Math.PI / 6; g.lineTo(cx + Math.cos(a) * 10, cy + Math.sin(a) * 10); }
+        g.fill();
+      }
+      para(s.k, 21, C_INK2, { x: P + 30, weight: 600, ls: 3, upper: true });
+      y += 8;
+      para(s.name, MOBILE ? 66 : 80, C_INK, { weight: 900, fam: F_D, upper: true, lh: 1.0 });
+      y += 8;
+      para(s.who, 22, C_INK2, { weight: 600, ls: 7, upper: true });
+      y += 16;
+      const half = (W - 2 * P) / 2, top = y;
+      s.meta.forEach(([k, v], i) => {
+        const full = i >= 2;
+        const x = full ? P : P + (i % 2) * half;
+        if (!full) y = top;
+        para(k, 18, C_INK3, { x, w: full ? W - 2 * P : half - 20, weight: 500, ls: 3, upper: true, lh: 1.4 });
+        para(v, full ? 22 : 26, full ? C_INK2 : C_INK, { x, w: full ? W - 2 * P : half - 20, weight: 500 });
+        y += 12;
+      });
+      y += 6;
+      links(s.links);
+    }
+    return Math.ceil(y + P - 10);
+  };
+  c.width = W;
+  c.height = draw(true);
+  regions.length = 0;
+  draw(false);
+  return { canvas: c, regions };
+}
+
+function makeCards(section, camera) {
+  const group = new THREE.Group();
+  camera.add(group);
+  const cards = [];
+  const panels = [...section.querySelectorAll('.panel.ghost')];
+  const build = async () => {
+    for (const [i, el] of panels.entries()) {
+      const spec = await readPanel(el);
+      const { canvas: cv, regions } = renderCard(spec);
+      const tex = new THREE.CanvasTexture(cv);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 4;
+      const mat = new THREE.ShaderMaterial({
+        uniforms: { uMap: { value: tex }, uReveal: { value: 0 }, uFade: { value: 0 }, uHover: { value: 0 }, uAsp: { value: cv.height / cv.width }, uRegion: { value: new THREE.Vector4(2, 2, 2, 2) } },
+        transparent: true, depthWrite: false, depthTest: false,
+        vertexShader: VS_UV,
+        fragmentShader: /* glsl */ `
+          uniform sampler2D uMap; uniform float uReveal, uFade, uHover, uAsp; uniform vec4 uRegion; varying vec2 vUv;
+          float h(vec2 c){ return fract(sin(dot(c, vec2(12.9898, 78.233))) * 43758.5453); }
+          void main(){
+            float thr = h(floor(vec2(vUv.x * 64.0, vUv.y * 64.0 * uAsp)));
+            float sweep = uReveal * 1.35 - (1.0 - vUv.y) * 0.35;
+            if (thr > sweep) discard;
+            float fresh = smoothstep(0.1, 0.0, sweep - thr) * step(uReveal, 0.999);
+            float sh = (1.0 - uReveal) * 0.008;
+            vec4 c = texture2D(uMap, vUv);
+            c.r = texture2D(uMap, vUv + vec2(sh, 0.0)).r; c.b = texture2D(uMap, vUv - vec2(sh, 0.0)).b;
+            float inR = step(uRegion.x, vUv.x) * step(vUv.x, uRegion.z) * step(uRegion.y, vUv.y) * step(vUv.y, uRegion.w);
+            vec3 col = c.rgb * (0.9 + uHover * 0.03) + fresh * vec3(0.25, 0.6, 0.6) + inR * vec3(0.1, 0.26, 0.26);
+            gl_FragColor = vec4(col, max(c.a, fresh * 0.35) * uFade);
+          }`,
+      });
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
+      mesh.renderOrder = 10;
+      mesh.visible = false;
+      group.add(mesh);
+      cards.push({ mesh, mat, a: spec.a, b: spec.b, regions, W: cv.width, Hc: cv.height, side: i % 2 ? 1 : -1, i, w: 1, h: 1, x: 0, y: 0, D: 5, hover: 0, region: null });
+    }
+    layoutAll();
+  };
+  let vw = 1, vh = 1;
+  function layoutAll() {
+    const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    for (const cd of cards) {
+      cd.D = 5;
+      vh = 2 * cd.D * tan; vw = vh * camera.aspect;
+      const asp = cd.Hc / cd.W;
+      if (MOBILE) {
+        cd.w = Math.min(vw * 0.92, (vh * 0.7) / asp);
+        cd.h = cd.w * asp;
+        cd.x = 0; cd.y = -vh / 2 + cd.h / 2 + vh * 0.045;
+      } else {
+        cd.w = Math.min(vw * 0.5, (vh * 0.74) / asp);
+        cd.h = cd.w * asp;
+        cd.x = -vw / 2 + cd.w / 2 + vw * 0.035;
+        cd.y = Math.min(-vh * 0.06, vh * 0.31 - cd.h / 2);
+      }
+      cd.mesh.scale.set(cd.w, cd.h, 1);
+    }
+  }
+  const ready = (document.fonts ? document.fonts.ready : Promise.resolve()).then(build);
+  return {
+    ready,
+    layout: layoutAll,
+    update(t, time, dt, ptr) {
+      for (const cd of cards) {
+        const lt = (t - cd.a) / Math.max(0.001, cd.b - cd.a);
+        const vis = lt > -0.02 && lt < 1.04;
+        cd.mesh.visible = vis;
+        if (!vis) { cd.mat.uniforms.uReveal.value = 0; continue; }
+        const enter = ease(clamp01(lt / 0.2)), exit = ease(clamp01((lt - 0.84) / 0.2));
+        cd.hover += ((cd.region ? 1 : 0) - cd.hover) * (1 - Math.exp(-dt * 8));
+        const bob = Math.sin(time * 0.7 + cd.i * 1.7);
+        cd.mesh.position.set(
+          cd.x + (1 - enter) * cd.side * 1.6 - exit * 2.2 + ptr.x * 0.06,
+          cd.y + bob * 0.05 + exit * 1.4,
+          -(cd.D + (1 - enter) * 16 + exit * 7),
+        );
+        cd.mesh.rotation.set(-ptr.y * 0.07 + bob * 0.01, (MOBILE ? 0 : 0.14) + ptr.x * 0.1 + (1 - enter) * cd.side * 0.5, (1 - enter) * cd.side * 0.08);
+        cd.mat.uniforms.uReveal.value = clamp01(lt / 0.24);
+        cd.mat.uniforms.uFade.value = (1 - exit) * smooth(-0.02, 0.06, lt);
+        cd.mat.uniforms.uHover.value = cd.hover;
+      }
+    },
+    pick(ray) {
+      const vis = cards.filter((c) => c.mesh.visible && c.mat.uniforms.uFade.value > 0.6);
+      const hit = ray.intersectObjects(vis.map((c) => c.mesh), false)[0];
+      let found = null;
+      for (const cd of cards) cd.region = null;
+      if (hit) {
+        const cd = cards.find((c) => c.mesh === hit.object);
+        const px = hit.uv.x * cd.W, py = (1 - hit.uv.y) * cd.Hc;
+        const r = cd.regions.find((q) => px >= q.x0 && px <= q.x1 && py >= q.y0 && py <= q.y1);
+        if (r) { cd.region = r; found = r.action; }
+        for (const c of cards) {
+          const q = c.region;
+          c.mat.uniforms.uRegion.value.set(q ? q.x0 / c.W : 2, q ? 1 - q.y1 / c.Hc : 2, q ? q.x1 / c.W : 2, q ? 1 - q.y0 / c.Hc : 2);
+        }
+      } else cards.forEach((c) => c.mat.uniforms.uRegion.value.set(2, 2, 2, 2));
+      return found;
+    },
+  };
+}
+
+// ---------------------------------------------------------------- floating symbols
+// Glyphs drifting through a scene; they scatter away from the cursor and brighten near it.
+function makeSymbols(glyphs, count, box) {
+  const cell = 128;
+  const c = document.createElement('canvas');
+  c.width = cell * glyphs.length; c.height = cell;
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  glyphs.forEach((ch, i) => {
+    g.font = `${ch.length > 2 ? 500 : 600} ${ch.length > 2 ? 38 : 64}px ${F_M}`;
+    g.fillText(ch, i * cell + cell / 2, cell / 2 + 4);
+  });
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const pos = new Float32Array(count * 3), gl = new Float32Array(count), sd = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    pos.set([rand(box[0], box[1]), rand(box[2], box[3]), rand(box[4], box[5])], i * 3);
+    gl[i] = Math.floor(rand(0, glyphs.length)); sd[i] = rand();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('aGlyph', new THREE.BufferAttribute(gl, 1));
+  geo.setAttribute('aSeed', new THREE.BufferAttribute(sd, 1));
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uMap: { value: tex }, uN: { value: glyphs.length }, uTime: { value: 0 }, uMouse: { value: new THREE.Vector3(9, 9, 0) }, uAsp: { value: 1 }, uSize: { value: 1 } },
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: /* glsl */ `attribute float aGlyph, aSeed; uniform float uTime, uAsp, uSize; uniform vec3 uMouse;
+      varying float vG, vNear, vSeed;
+      void main(){ vG = aGlyph; vSeed = aSeed;
+        vec3 p = position + vec3(sin(uTime * 0.31 + aSeed * 20.0), cos(uTime * 0.27 + aSeed * 13.0), sin(uTime * 0.2 + aSeed * 7.0)) * 0.35;
+        vec4 clip = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+        vec2 d = clip.xy / clip.w - uMouse.xy; d.x *= uAsp;
+        float f = exp(-dot(d, d) * 14.0) * uMouse.z;
+        clip.xy += normalize(d + 1e-4) * f * 0.16 * clip.w * vec2(1.0 / uAsp, 1.0);
+        vNear = f;
+        gl_PointSize = uSize * (0.6 + aSeed * 0.9) * (1.0 + f * 0.6) * (24.0 / clip.w);
+        gl_Position = clip; }`,
+    fragmentShader: /* glsl */ `uniform sampler2D uMap; uniform float uN, uTime; varying float vG, vNear, vSeed;
+      void main(){ vec2 uv = vec2((vG + gl_PointCoord.x) / uN, 1.0 - gl_PointCoord.y);
+        float a = texture2D(uMap, uv).a;
+        float flick = 0.75 + 0.25 * sin(uTime * (1.0 + vSeed * 3.0) + vSeed * 40.0);
+        vec3 col = mix(vec3(0.47, 0.78, 0.78), vec3(1.0), vNear);
+        gl_FragColor = vec4(col * a * (0.32 + vNear * 0.7) * flick, 1.0); }`,
+  });
+  const pts = new THREE.Points(geo, mat);
+  pts.frustumCulled = false;
+  return {
+    object: pts,
+    resize(w, h) { mat.uniforms.uAsp.value = w / h; mat.uniforms.uSize.value = renderer.getPixelRatio() * (MOBILE ? 1.6 : 2.2); },
+    update(time, ptr) {
+      mat.uniforms.uTime.value = time;
+      const m = mat.uniforms.uMouse.value;
+      m.x = ptr.rawX; m.y = ptr.rawY; m.z += ((ptr.active ? 1 : 0) - m.z) * 0.08;
+    },
+  };
+}
+
 // ---------------------------------------------------------------- about: inside a neural network
 // Layers of neurons the camera flies through; activations travel forward layer by layer,
 // pulses run along the connections.
@@ -407,6 +798,7 @@ function makeNetwork() {
   scene.background = bg;
   scene.fog = new THREE.FogExp2(bg, 0.034);
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
+  scene.add(camera);
 
   const LAYERS = 16, GAP = 7, side = MOBILE ? 7 : 9;
   const nodes = [];
@@ -469,13 +861,18 @@ function makeNetwork() {
   });
   scene.add(new THREE.LineSegments(lg, lMat));
 
-  // faint input/output planes with a grid, so depth reads
   const len = (LAYERS - 1) * GAP;
+  const cards = makeCards(document.getElementById('about'), camera);
+  const sym = makeSymbols(['λ', '∇', 'Σ', '∂', '∫', 'π', 'θ', 'σ', '{ }', '< >', '0', '1', '→', '⊕', 'f(x)', 'ŷ', 'w·x', 'ReLU', 'softmax', '[ ]'],
+    Math.round(160 * Q + 60), [-8, 8, -5.5, 5.5, -len - 6, 10]);
+  scene.add(sym.object);
   return {
-    scene, camera, bloom: [0.8, 0.55, 0.66], edge: 0x000000, vig: 1,
-    resize(w, h) { camera.aspect = w / h; camera.fov = MOBILE ? 72 : 60; camera.updateProjectionMatrix(); },
+    scene, camera, bloom: [0.8, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready,
+    resize(w, h) { camera.aspect = w / h; camera.fov = MOBILE ? 72 : 60; camera.updateProjectionMatrix(); cards.layout(); sym.resize(w, h); },
     update(t, time, dt, ptr) {
       nMat.uniforms.uTime.value = time; lMat.uniforms.uTime.value = time;
+      sym.update(time, ptr);
+      cards.update(t, time, dt, ptr);
       const z = 9 - t * (len + 6);
       const sway = Math.sin(t * 6.0) * 1.2;
       camera.position.set(sway + ptr.x * 0.8, Math.cos(t * 4.0) * 0.8 + ptr.y * 0.5, z);
@@ -507,6 +904,7 @@ function makeSignals() {
   scene.background = bg;
   scene.fog = new THREE.Fog(bg, 6, 46);
   const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 120);
+  scene.add(camera);
   const LEN = 90, SEG = Math.round(900 * Q);
   const traces = [];
   const make = (y, z, kind, amp, color, ch) => {
@@ -562,10 +960,16 @@ function makeSignals() {
   grid.position.set(LEN / 2 - 10, 0, -9);
   scene.add(grid);
 
+  const cards = makeCards(document.getElementById('journey'), camera);
+  const sym = makeSymbols(['α', 'β', 'θ', 'δ', 'γ', 'μV', 'Hz', '♥', '∿', '~', '+', 'ECG', 'Fz', 'Cz', 'O1', 'SpO₂', 'bpm', '°C', 'NEWS2', '10–20'],
+    Math.round(150 * Q + 50), [-12, LEN - 10, -5, 5, -5, 5]);
+  scene.add(sym.object);
   return {
-    scene, camera, bloom: [0.9, 0.55, 0.45], edge: 0x000000, vig: 1,
-    resize(w, h) { camera.aspect = w / h; camera.fov = MOBILE ? 66 : 50; camera.updateProjectionMatrix(); },
+    scene, camera, bloom: [0.9, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready,
+    resize(w, h) { camera.aspect = w / h; camera.fov = MOBILE ? 66 : 50; camera.updateProjectionMatrix(); cards.layout(); sym.resize(w, h); },
     update(t, time, dt, ptr) {
+      sym.update(time, ptr);
+      cards.update(t, time, dt, ptr);
       const x = -2 + t * (LEN - 26);
       traces.forEach((mt) => { mt.uniforms.uTime.value = time; mt.uniforms.uSweep.value = x + 9 + ((time * 6) % 18); });
       camera.position.set(x + ptr.x * 0.6, 0.2 + ptr.y * 0.4 + Math.sin(t * 3) * 0.6, 7.2 - Math.sin(t * Math.PI) * 1.8);
@@ -781,12 +1185,26 @@ async function start() {
   resize();
   addEventListener('resize', resize);
 
+  await Promise.all(SCENES.map((s) => s.ready).filter(Boolean)); // card textures drawn
   // compile every scene once so the first cut into each one doesn't stall
   SCENES.forEach((s) => renderer.compile(s.scene, s.camera));
   tick(1);
   H.classList.add('ready');
 
-  let last = performance.now(), cur = -1;
+  let last = performance.now(), cur = -1, hoverAction = null;
+  const ray = new THREE.Raycaster();
+  let downAt = null;
+  canvas.addEventListener('pointerdown', (e) => { downAt = [e.clientX, e.clientY]; });
+  canvas.addEventListener('click', (e) => {
+    if (downAt && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 8) return; // a drag, not a click
+    const S = SCENES[site.idx];
+    if (!S.pick) return;
+    pointer.rawX = (e.clientX / innerWidth) * 2 - 1; pointer.rawY = -((e.clientY / innerHeight) * 2 - 1);
+    ray.setFromCamera({ x: pointer.rawX, y: pointer.rawY }, S.camera);
+    const act = S.pick(ray);
+    if (act && act.case) site.openCase(act.case);
+    else if (act && act.href) window.open(act.href, '_blank', 'noopener');
+  });
   const edge = new THREE.Color();
   function loop(now) {
     const time = now / 1000, dt = Math.min(0.1, (now - last) / 1000);
@@ -808,6 +1226,11 @@ async function start() {
       cam.uniforms.uBlack.value = S.light ? 0 : 0.03;
     }
     S.update(site.t, time, dt, pointer);
+    if (S.pick) {
+      ray.setFromCamera({ x: pointer.rawX, y: pointer.rawY }, S.camera);
+      hoverAction = pointer.active ? S.pick(ray) : null;
+      canvas.style.cursor = hoverAction ? 'pointer' : '';
+    } else if (hoverAction) { hoverAction = null; canvas.style.cursor = ''; }
     // tape faults surge around every cut between scenes (a "handover"), plus a kick after menu jumps
     let d = 9;
     for (let k = 1; k < site.cum.length - 1; k++) d = Math.min(d, Math.abs(site.us - site.cum[k]));
