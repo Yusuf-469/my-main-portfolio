@@ -168,7 +168,7 @@ function makeLogos(scene, camera, list) {
   group.add(lines);
   let edges = [];
 
-  let tilePx = 56, worldSize = 0.7;
+  let tilePx = 56, worldSize = 0.7, blockedRects = [];
   const rest = new THREE.PerspectiveCamera();
   const ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), hit = new THREE.Vector3();
 
@@ -178,6 +178,7 @@ function makeLogos(scene, camera, list) {
     tilePx = MOBILE ? 34 : Math.round(Math.min(64, Math.max(48, w / 26)));
     const pad = tilePx * 0.5 + (MOBILE ? 8 : 14);
     const blocked = [];
+    blockedRects = blocked;
     const add = (r, m = MOBILE ? 8 : 18) => { if (r && r.width > 0) blocked.push({ l: r.left - m, t: r.top - m, r: r.right + m, b: r.bottom + m }); };
     document.querySelectorAll('#top .panel, .hud').forEach((el) => add(el.getBoundingClientRect()));
     // the portrait's silhouette: head narrower than the shoulders
@@ -200,7 +201,7 @@ function makeLogos(scene, camera, list) {
     cand.sort((a, b) => a[2] - b[2]);
     // greedy: keep the largest spacing that still fits every tile
     let picked = [];
-    for (let minD = tilePx * 2.6; minD >= tilePx * (MOBILE ? 1.12 : 1.25); minD *= 0.92) {
+    for (let minD = tilePx * 2.6; minD >= tilePx * (MOBILE ? 1.3 : 1.55); minD *= 0.92) {
       picked = [];
       for (const c of cand) {
         if (picked.every((p) => Math.hypot(p[0] - c[0], p[1] - c[1]) >= minD)) picked.push(c);
@@ -216,7 +217,7 @@ function makeLogos(scene, camera, list) {
       const [px, py] = picked[i];
       it.sx = px; it.sy = py;
       it.order = Math.hypot(px - cx, py - cy) / Math.hypot(cx, cy); // tiles appear from the centre outward
-      const z = rand(-1.2, 1.2);
+      const z = rand(-0.35, 0.35); // nearly flat, so parallax can't slide tiles into each other
       plane.constant = -z;
       ray.setFromCamera({ x: (px / w) * 2 - 1, y: -((py / h) * 2 - 1) }, rest);
       ray.ray.intersectPlane(plane, hit);
@@ -240,10 +241,23 @@ function makeLogos(scene, camera, list) {
     tip.hidden = false;
     const s = items[i].screen;
     const x = (s.x * 0.5 + 0.5) * w, y = (-s.y * 0.5 + 0.5) * h;
-    const tw = tip.offsetWidth, th = tip.offsetHeight, off = tilePx * 0.6 + 12;
-    const left = x + off + tw > w - 8 ? x - off - tw : x + off;
-    tip.style.left = Math.max(8, left) + 'px';
-    tip.style.top = Math.min(h - th - 8, Math.max(8, y - th / 2)) + 'px';
+    const tw = tip.offsetWidth, th = tip.offsetHeight, off = tilePx * 0.6 + 10;
+    // try right, left, below and above; keep the one that covers the fewest tiles and no text or photo
+    const tiles = items.filter((it, k) => it.on && k !== i).map((it) => {
+      const tx = (it.screen.x * 0.5 + 0.5) * w, ty = (-it.screen.y * 0.5 + 0.5) * h, r = tilePx / 2;
+      return { l: tx - r, t: ty - r, r: tx + r, b: ty + r };
+    });
+    const overlap = (a, q) => Math.max(0, Math.min(a.r, q.r) - Math.max(a.l, q.l)) * Math.max(0, Math.min(a.b, q.b) - Math.max(a.t, q.t));
+    let best = null;
+    for (const [lx, ly] of [[x + off, y - th / 2], [x - off - tw, y - th / 2], [x - tw / 2, y + off], [x - tw / 2, y - off - th]]) {
+      const l = Math.min(w - tw - 8, Math.max(8, lx)), t = Math.min(h - th - 8, Math.max(8, ly));
+      const rc = { l, t, r: l + tw, b: t + th };
+      const cost = tiles.reduce((a, q) => a + overlap(rc, q), 0) + blockedRects.reduce((a, q) => a + overlap(rc, q) * 3, 0)
+        + overlap(rc, { l: x - tilePx / 2, t: y - tilePx / 2, r: x + tilePx / 2, b: y + tilePx / 2 }) * 10;
+      if (!best || cost < best.cost) best = { cost, l, t };
+    }
+    tip.style.left = best.l + 'px';
+    tip.style.top = best.t + 'px';
     requestAnimationFrame(() => tip.classList.add('on'));
   }
   function hide() { tip.classList.remove('on'); tip.hidden = true; shown = -1; pinned = -1; }
@@ -285,7 +299,7 @@ function makeLogos(scene, camera, list) {
         it.hover += ((i === hov || i === pinned ? 1 : 0) - it.hover) * 0.2;
         const appear = smooth(it.order * 0.7, it.order * 0.7 + 0.3, intro);
         it.sp.position.copy(it.pos);
-        it.sp.scale.setScalar(it.size * (0.6 + appear * 0.4) * (1 + it.hover * 0.22));
+        it.sp.scale.setScalar(it.size * (0.6 + appear * 0.4) * (1 + it.hover * 0.1));
         it.mat.rotation = Math.sin(time * 0.6 + it.seed * 9) * 0.06;
         it.mat.opacity = appear * (1 - exit) * (0.82 + it.hover * 0.18);
       });
@@ -538,7 +552,7 @@ function makeWork() {
     return { mesh, mat, p, video: card.dataset.video || '', vid: null, img: null };
   });
 
-  // drifting sheets of log text and black shards, like light passing through a studio
+  // drifting sheets of log text, like light passing through a studio
   const texes = [0, 1, 2, 3].map(codeTexture);
   const sheetGeo = new THREE.PlaneGeometry(11, 5.5);
   const sheets = [];
@@ -553,15 +567,6 @@ function makeWork() {
     scene.add(s);
     sheets.push(s);
   }
-  const shardMat = new THREE.MeshBasicMaterial({ color: 0x050607, side: THREE.DoubleSide });
-  for (let k = 0; k < Math.round(12 * Q + 2); k++) {
-    const base = screens[k % N].p;
-    const s = new THREE.Mesh(new THREE.PlaneGeometry(rand(3, 8), rand(0.4, 1.4)), shardMat);
-    s.position.set(base.x + rand(-9, 9), base.y + rand(-5, 5), base.z + rand(-10, -2));
-    s.rotation.set(rand(-1.4, 1.4), rand(-1, 1), rand(-1.4, 1.4));
-    scene.add(s);
-  }
-
   let D = 7, ox = 0, oy = 0, active = -1;
   const camAt = (i) => new THREE.Vector3(screens[i].p.x - ox, screens[i].p.y - oy, screens[i].p.z + D);
   const lookAt = (i) => new THREE.Vector3(screens[i].p.x - ox, screens[i].p.y - oy, screens[i].p.z);
