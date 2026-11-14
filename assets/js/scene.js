@@ -136,7 +136,7 @@ function makeLogos(scene, camera, list) {
 
   // spread the logos evenly over the parts of the ring that are free of text
   // (desktop: the name sits left, the tagline right; phones: tagline on top, name below)
-  const gaps = MOBILE ? [[Math.PI / 2, 0.55], [-Math.PI / 2, 1.0]] : [[Math.PI, 0.55], [0, 0.32]];
+  const gaps = MOBILE ? [[Math.PI / 2, 0.55], [-Math.PI / 2, 1.0]] : [[Math.PI, 0.55], [0, 0.32], [-Math.PI / 2, 0.62]];
   const free = (a) => gaps.every(([c, r]) => Math.abs(Math.atan2(Math.sin(a - c), Math.cos(a - c))) > r);
   const angles = [];
   for (let k = 0; k < 720 && angles.length < 720; k++) { const a = (k / 720) * Math.PI * 2; if (free(a)) angles.push(a); }
@@ -149,8 +149,10 @@ function makeLogos(scene, camera, list) {
     const img = new Image();
     img.onload = () => { const g = c.getContext('2d'); g.clearRect(0, 0, 128, 128); g.drawImage(img, 16, 16, 96, 96); tex.needsUpdate = true; };
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(sk.svg);
-    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0 });
+    // drawn after the portrait and never depth-tested against it, so no logo hides behind the photo
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false, opacity: 0 });
     const sp = new THREE.Sprite(mat);
+    sp.renderOrder = 20;
     group.add(sp);
     // an ellipse around the portrait, wider than the face so nothing sits on it
     const a = pick(i) + rand(-0.03, 0.03);
