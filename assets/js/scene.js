@@ -656,8 +656,12 @@ function renderCard(s) {
 }
 
 function makeCards(section, camera) {
+  // Cards live in their own scene, drawn after the camcorder pass so the text stays sharp;
+  // the group follows the camera every frame, so they still sit in the scene's space.
+  const overlay = new THREE.Scene();
   const group = new THREE.Group();
-  camera.add(group);
+  group.matrixAutoUpdate = false;
+  overlay.add(group);
   const cards = [];
   const panels = [...section.querySelectorAll('.panel.ghost')];
   const build = async () => {
@@ -665,8 +669,8 @@ function makeCards(section, camera) {
       const spec = await readPanel(el);
       const { canvas: cv, regions } = renderCard(spec);
       const tex = new THREE.CanvasTexture(cv);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = 4;
+      tex.colorSpace = THREE.NoColorSpace; // drawn straight to the screen: keep the canvas colours as they are
+      tex.anisotropy = 8;
       const mat = new THREE.ShaderMaterial({
         uniforms: { uMap: { value: tex }, uReveal: { value: 0 }, uFade: { value: 0 }, uHover: { value: 0 }, uAsp: { value: cv.height / cv.width }, uRegion: { value: new THREE.Vector4(2, 2, 2, 2) } },
         transparent: true, depthWrite: false, depthTest: false,
@@ -718,8 +722,12 @@ function makeCards(section, camera) {
   const ready = (document.fonts ? document.fonts.ready : Promise.resolve()).then(build);
   return {
     ready,
+    overlay,
     layout: layoutAll,
     update(t, time, dt, ptr) {
+      camera.updateMatrixWorld();
+      group.matrix.copy(camera.matrixWorld);
+      group.updateMatrixWorld(true);
       for (const cd of cards) {
         const lt = (t - cd.a) / Math.max(0.001, cd.b - cd.a);
         const vis = lt > -0.02 && lt < 1.04;
@@ -738,6 +746,7 @@ function makeCards(section, camera) {
         cd.mat.uniforms.uFade.value = (1 - exit) * smooth(-0.02, 0.06, lt);
         cd.mat.uniforms.uHover.value = cd.hover;
       }
+      group.updateMatrixWorld(true);
     },
     pick(ray) {
       const vis = cards.filter((c) => c.mesh.visible && c.mat.uniforms.uFade.value > 0.6);
@@ -894,7 +903,7 @@ function makeNetwork() {
     Math.round(160 * Q + 60), [-8, 8, -5.5, 5.5, -len - 6, 10]);
   scene.add(sym.object);
   return {
-    scene, camera, bloom: [0.8, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready,
+    scene, camera, bloom: [0.8, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready, overlay: cards.overlay,
     resize(w, h) { camera.aspect = w / h; camera.fov = MOBILE ? 72 : 60; camera.updateProjectionMatrix(); cards.layout(); sym.resize(w, h); },
     update(t, time, dt, ptr) {
       nMat.uniforms.uTime.value = time; lMat.uniforms.uTime.value = time;
@@ -992,7 +1001,7 @@ function makeSignals() {
     Math.round(150 * Q + 50), [-12, LEN - 10, -5, 5, -5, 5]);
   scene.add(sym.object);
   return {
-    scene, camera, bloom: [0.9, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready,
+    scene, camera, bloom: [0.9, 0.55, 0.95], edge: 0x000000, vig: 1, pick: cards.pick, ready: cards.ready, overlay: cards.overlay,
     resize(w, h) { camera.aspect = w / h; camera.fov = MOBILE ? 66 : 50; camera.updateProjectionMatrix(); cards.layout(); sym.resize(w, h); },
     update(t, time, dt, ptr) {
       sym.update(time, ptr);
@@ -1235,6 +1244,13 @@ async function start() {
     cam.uniforms.uGlitch.value = Math.min(1, Math.pow(clamp01(1 - d / 0.14), 2) + site.kick * 0.6);
     cam.uniforms.uTime.value = time;
     composer.render(dt);
+    if (S.overlay) {
+      // text cards on top of the finished frame, untouched by bloom and the camcorder pass
+      renderer.autoClear = false;
+      renderer.clearDepth();
+      renderer.render(S.overlay, S.camera);
+      renderer.autoClear = true;
+    }
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
