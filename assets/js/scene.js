@@ -156,9 +156,10 @@ function makeLogos(scene, camera, list) {
     const a = pick(i) + rand(-0.03, 0.03);
     const rx = (MOBILE ? 3.3 : 6.5) + rand(-0.5, 0.6), ry = (MOBILE ? 5.0 : 3.9) + rand(-0.4, 0.4);
     const base = new THREE.Vector3(Math.cos(a) * rx, Math.sin(a) * ry + (MOBILE ? 0.6 : 0), rand(-3.2, -0.6));
+    const orbit = { a, rx, ry, sp: rand(0.6, 1.4) };
     const html = `<b>${sk.name}</b><small>used in</small><ul>` + sk.projects.map((p) =>
       `<li><button type="button" data-case="${p.id}"><img src="${p.img}" alt="" width="64" height="40" loading="lazy" decoding="async"><span>${p.name}</span></button></li>`).join('') + '</ul>';
-    return { sp, mat, base, seed: rand(), hover: 0, html, pos: new THREE.Vector3(), screen: new THREE.Vector3() };
+    return { sp, mat, base, orbit, seed: rand(), hover: 0, html, pos: new THREE.Vector3(), screen: new THREE.Vector3(), vis: 1 };
   });
 
   const size = MOBILE ? 0.62 : 0.72;
@@ -178,6 +179,7 @@ function makeLogos(scene, camera, list) {
     let best = -1, bd = 1e9;
     const r = (size / (2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)))) * h * 0.75 + 8;
     items.forEach((it, i) => {
+      if (it.vis < 0.5) return;
       const dx = (it.screen.x - px) * w / 2, dy = (it.screen.y - py) * h / 2, d = Math.hypot(dx, dy);
       if (d < r && d < bd) { bd = d; best = i; }
     });
@@ -189,11 +191,18 @@ function makeLogos(scene, camera, list) {
       const w = innerWidth, h = innerHeight;
       const exit = smooth(0.32, 0.8, t);
       for (const it of items) {
+        // the ring orbits slowly; each logo also bobs, drifts in depth and tilts on its own rhythm
+        const o = it.orbit, sd = it.seed * 10;
+        const ang = o.a + time * 0.045 + Math.sin(time * 0.3 * o.sp + sd) * 0.12;
         it.pos.set(
-          it.base.x + Math.sin(time * 0.42 + it.seed * 10) * 0.2,
-          it.base.y + Math.cos(time * 0.35 + it.seed * 7) * 0.16,
-          it.base.z,
+          Math.cos(ang) * o.rx + Math.sin(time * 0.55 * o.sp + sd) * 0.35,
+          Math.sin(ang) * o.ry + (MOBILE ? 0.6 : 0) + Math.cos(time * 0.47 * o.sp + sd * 1.3) * 0.32,
+          it.base.z + Math.sin(time * 0.4 * o.sp + sd * 0.7) * 0.9,
         );
+        it.sp.material.rotation = Math.sin(time * 0.6 * o.sp + sd) * 0.22;
+        // fade while passing behind the name or the tagline
+        const gap = Math.min(...gaps.map(([c, r]) => { const d = Math.abs(Math.atan2(Math.sin(ang - c), Math.cos(ang - c))); return smooth(r - 0.05, r + 0.3, d); }));
+        it.vis = gap;
         it.pos.multiplyScalar(1 + exit * 1.3);
         it.pos.z += exit * 7;
         it.screen.copy(it.pos).project(camera);
@@ -209,7 +218,7 @@ function makeLogos(scene, camera, list) {
         it.hover += ((i === hov || i === pinned ? 1 : 0) - it.hover) * 0.2;
         it.sp.position.copy(it.pos);
         it.sp.scale.setScalar(size * (1 + it.hover * 0.35));
-        it.mat.opacity = intro * (1 - exit) * (0.7 + it.hover * 0.3);
+        it.mat.opacity = intro * (1 - exit) * (0.7 + it.hover * 0.3) * it.vis;
       });
       canvas.style.cursor = hov >= 0 ? 'pointer' : '';
       const want = hov >= 0 ? hov : pinned;
