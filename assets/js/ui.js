@@ -167,6 +167,37 @@
     if (navigator.clipboard) navigator.clipboard.writeText('yusufjawed8@gmail.com').then(done, function () { copyMsg.textContent = 'Copy failed. The address is yusufjawed8@gmail.com.'; });
   });
 
+  // ---- word-by-word reveal: wrap each word (inside <em> too) in a span with its index ----
+  [].forEach.call(document.querySelectorAll('.split'), function (el) {
+    var i = 0;
+    (function walk(node) {
+      [].slice.call(node.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(function (part) {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            var w = document.createElement('span');
+            w.className = 'w'; w.style.setProperty('--i', i++); w.textContent = part;
+            frag.appendChild(w);
+          });
+          n.parentNode.replaceChild(frag, n);
+        } else if (n.nodeType === 1) walk(n);
+      });
+    })(el);
+  });
+
+  // ---- certificate card tilts toward the pointer ----
+  var cert = document.querySelector('.cert');
+  if (cert) {
+    cert.addEventListener('pointermove', function (e) {
+      var r = cert.getBoundingClientRect();
+      cert.style.setProperty('--ry', ((e.clientX - r.left) / r.width - 0.5) * 14 + 'deg');
+      cert.style.setProperty('--rx', -((e.clientY - r.top) / r.height - 0.5) * 12 + 'deg');
+    });
+    cert.addEventListener('pointerleave', function () { cert.style.setProperty('--rx', '0deg'); cert.style.setProperty('--ry', '0deg'); });
+  }
+
   // ---- start ----
   function fallback() {
     // 3D failed to load: show the plain document instead

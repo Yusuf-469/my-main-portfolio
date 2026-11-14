@@ -575,72 +575,166 @@ function makeSignals() {
   };
 }
 
-// ---------------------------------------------------------------- contact: the portrait as a point cloud
-// The same photo as the hero, now in colour and depth, drifting apart and back together.
-function makePoints(data) {
+// ---------------------------------------------------------------- contact: the portrait, resolved
+// A colour point cloud of the photo assembles, then a scan beam sweeps down and reveals the
+// cleaned-up cut-out photo (assets/portrait-cut.webp) flat and undistorted; the points it passes
+// dissolve upward as sparks. A warm rim light, a halo, holographic rings and drifting motes finish it.
+function makeFinale(data) {
   const scene = new THREE.Scene();
-  const bg = new THREE.Color(0x040203);
-  scene.background = bg;
-  const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+  scene.background = new THREE.Color(0x050304);
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
   const N = data.n, p = data.p, count = p.length / 5, U = 7 / N;
-  const pos = new Float32Array(count * 3), col = new Float32Array(count * 3), seed = new Float32Array(count);
+  const X = MOBILE ? 0 : 2.5, Y = MOBILE ? 0.9 : 0;
+  const rig = new THREE.Group();
+  rig.position.set(X, Y, 0);
+  scene.add(rig);
+
+  // halo and soft light rays behind the head
+  const halo = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uOn: { value: 0 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: VS_UV,
+    fragmentShader: /* glsl */ `uniform float uTime, uOn; varying vec2 vUv;
+      void main(){ vec2 q = vUv - vec2(0.5, 0.58); float r = length(q); float a = atan(q.y, q.x);
+        float glow = exp(-r * 5.0) * 0.55 + exp(-r * 14.0) * 0.5;
+        float rays = pow(0.5 + 0.5 * sin(a * 18.0 + uTime * 0.25) * sin(a * 7.0 - uTime * 0.18), 3.0) * exp(-r * 3.2) * 0.35;
+        vec3 c = mix(vec3(1.0, 0.42, 0.2), vec3(0.47, 0.78, 0.78), smoothstep(0.0, 0.5, r));
+        float edge = smoothstep(0.5, 0.3, max(abs(vUv.x - 0.5), abs(vUv.y - 0.5)));
+        gl_FragColor = vec4(c * (glow + rays) * uOn * edge, 1.0); }`,
+  }));
+  halo.position.set(0, 0.3, -1.6);
+  rig.add(halo);
+
+  // point cloud
+  const pos = new Float32Array(count * 3), col = new Float32Array(count * 3), seed = new Float32Array(count), yn = new Float32Array(count);
   for (let i = 0; i < count; i++) {
     const x = p[5 * i], y = p[5 * i + 1];
-    const r = p[5 * i + 2] / 255, g = p[5 * i + 3] / 255, b = p[5 * i + 4] / 255;
-    const l = 0.299 * r + 0.587 * g + 0.114 * b;
-    pos.set([(x - N / 2) * U, -(y - N / 2) * U, l * 0.9 - 0.45 + rand(-0.04, 0.04)], i * 3);
-    col.set([r, g, b], i * 3);
-    seed[i] = rand();
+    pos.set([(x - N / 2) * U, -(y - N / 2) * U, rand(-0.03, 0.03)], i * 3);
+    col.set([p[5 * i + 2] / 255, p[5 * i + 3] / 255, p[5 * i + 4] / 255], i * 3);
+    seed[i] = rand(); yn[i] = y / N;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
   geo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
-  const mat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uSpread: { value: 1 }, uSize: { value: 1 } },
-    vertexShader: /* glsl */ `attribute vec3 aColor; attribute float aSeed; uniform float uTime, uSpread, uSize; varying vec3 vC;
+  geo.setAttribute('aYN', new THREE.BufferAttribute(yn, 1));
+  const pMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uSpread: { value: 1 }, uSize: { value: 1 }, uScan: { value: 0 } },
+    vertexShader: /* glsl */ `attribute vec3 aColor; attribute float aSeed, aYN; uniform float uTime, uSpread, uSize, uScan;
+      varying vec3 vC; varying float vGone;
       void main(){ vec3 p = position;
         vec3 dir = normalize(vec3(sin(aSeed * 91.0), cos(aSeed * 47.0), sin(aSeed * 13.0) * 1.5 + 0.6));
         p += dir * uSpread * (1.5 + aSeed * 5.0);
-        p.x += sin(uTime * 0.7 + p.y * 3.0) * 0.012;
-        vC = aColor * (0.75 + 0.5 * step(0.985, fract(aSeed * 13.7 + uTime * 0.2)));
+        float passed = clamp((uScan - aYN) * 7.0, 0.0, 1.0);
+        p.y += passed * (0.4 + aSeed * 2.8); p.z += passed * aSeed * 2.0; p.x += passed * (aSeed - 0.5) * 1.6;
+        vGone = passed;
+        vC = mix(aColor, vec3(0.75, 1.0, 1.0) * 1.6, passed);
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
-        gl_PointSize = uSize * (32.0 / -mv.z);
+        gl_PointSize = uSize * (1.0 - passed * 0.75) * (34.0 / -mv.z);
         gl_Position = projectionMatrix * mv; }`,
-    fragmentShader: /* glsl */ `varying vec3 vC;
-      void main(){ vec2 q = gl_PointCoord - 0.5; if (max(abs(q.x), abs(q.y)) > 0.42) discard;
-        gl_FragColor = vec4(vC * vec3(1.08, 0.86, 0.78), 1.0); }`,
+    fragmentShader: /* glsl */ `varying vec3 vC; varying float vGone;
+      void main(){ if (vGone > 0.97) discard; vec2 q = gl_PointCoord - 0.5; if (max(abs(q.x), abs(q.y)) > 0.42) discard;
+        gl_FragColor = vec4(vC, 1.0); }`,
   });
-  const cloud = new THREE.Points(geo, mat);
-  cloud.position.x = MOBILE ? 0 : 2.4;
-  scene.add(cloud);
+  const cloud = new THREE.Points(geo, pMat);
+  rig.add(cloud);
 
-  // a warm horizon line and floor grid
+  // the photo, revealed by the scan beam
+  const tex = new THREE.TextureLoader().load('assets/portrait-cut.webp', (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; t.needsUpdate = true; });
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const photoMat = new THREE.ShaderMaterial({
+    uniforms: { uMap: { value: tex }, uScan: { value: 0 }, uTime: { value: 0 } },
+    transparent: true, depthWrite: false,
+    vertexShader: VS_UV,
+    fragmentShader: /* glsl */ `uniform sampler2D uMap; uniform float uScan, uTime; varying vec2 vUv;
+      void main(){
+        vec4 tx = texture2D(uMap, vUv);
+        float yTop = 1.0 - vUv.y;
+        float shown = step(yTop, uScan);
+        float age = clamp((uScan - yTop) * 3.0, 0.0, 1.0);
+        vec3 col = tx.rgb;
+        // freshly scanned lines read as a hologram, then settle into the clean photo
+        col *= mix(0.82 + 0.18 * sin(vUv.y * 1100.0 - uTime * 6.0), 1.0, age);
+        col = mix(col * vec3(0.55, 1.0, 1.08) + vec3(0.0, 0.07, 0.09), col, age);
+        // warm rim light from the upper right, cool fill from the left
+        float rimR = tx.a * (1.0 - texture2D(uMap, vUv + vec2(0.007, 0.004)).a);
+        float rimL = tx.a * (1.0 - texture2D(uMap, vUv - vec2(0.006, -0.002)).a);
+        col += rimR * vec3(1.0, 0.55, 0.32) * 1.4 + rimL * vec3(0.4, 0.75, 0.8) * 0.8;
+        float beam = smoothstep(0.012, 0.0, abs(yTop - uScan)) * step(uScan, 1.0);
+        float a = tx.a * shown;
+        vec3 outc = col * a + vec3(0.65, 1.0, 1.0) * beam * (0.35 + tx.a * 1.8);
+        gl_FragColor = vec4(outc, max(a, beam * 0.75));
+      }`,
+  });
+  const photo = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), photoMat);
+  photo.position.z = 0.05;
+  rig.add(photo);
+
+  // holographic rings around the head
+  const rings = [3.1, 3.55, 4.1].map((r, i) => {
+    const m = new THREE.Mesh(new THREE.TorusGeometry(r, 0.012, 6, 240), new THREE.MeshBasicMaterial({
+      color: i === 1 ? new THREE.Color(1.6, 0.75, 0.45) : new THREE.Color(0.55, 1.1, 1.1), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending,
+    }));
+    m.position.set(0, 1.1 - i * 0.5, 0);
+    m.rotation.set(Math.PI / 2 - 0.22 + i * 0.12, 0, i * 0.4);
+    rig.add(m);
+    return m;
+  });
+
+  // motes drifting upward
+  const nM = Math.round(700 * Q);
+  const mpos = new Float32Array(nM * 3), mseed = new Float32Array(nM);
+  for (let i = 0; i < nM; i++) { mpos.set([rand(-7, 7), rand(-5, 5), rand(-4, 3)], i * 3); mseed[i] = rand(); }
+  const mgeo = new THREE.BufferGeometry();
+  mgeo.setAttribute('position', new THREE.BufferAttribute(mpos, 3));
+  mgeo.setAttribute('aSeed', new THREE.BufferAttribute(mseed, 1));
+  const mMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uSize: { value: 1 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: /* glsl */ `attribute float aSeed; uniform float uTime, uSize; varying float vA; varying float vS;
+      void main(){ vec3 p = position; p.y = mod(p.y + 5.0 + uTime * (0.15 + aSeed * 0.35), 10.0) - 5.0;
+        p.x += sin(uTime * 0.5 + aSeed * 30.0) * 0.2; vS = aSeed;
+        vA = smoothstep(-5.0, -3.0, p.y) * (1.0 - smoothstep(3.0, 5.0, p.y));
+        vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = uSize * (0.6 + aSeed * 1.6) * (20.0 / -mv.z); gl_Position = projectionMatrix * mv; }`,
+    fragmentShader: /* glsl */ `varying float vA; varying float vS;
+      void main(){ float d = length(gl_PointCoord - 0.5); float g = smoothstep(0.5, 0.0, d);
+        vec3 c = vS > 0.6 ? vec3(0.5, 0.95, 0.95) : vec3(1.0, 0.55, 0.3);
+        gl_FragColor = vec4(c * g * vA * 0.9, 1.0); }`,
+  });
+  rig.add(new THREE.Points(mgeo, mMat));
+
+  // warm floor grid
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.ShaderMaterial({
     vertexShader: 'varying vec3 vP; void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vP = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
     fragmentShader: /* glsl */ `varying vec3 vP;
       void main(){ vec2 g = abs(fract(vP.xz * 0.8) - 0.5); float l = smoothstep(0.47, 0.5, max(g.x, g.y));
-        float fade = exp(-length(vP.xz) * 0.06);
-        gl_FragColor = vec4(vec3(0.9, 0.32, 0.18) * l * fade * 0.55, 1.0); }`,
+        float fade = exp(-length(vP.xz - vec2(${X.toFixed(2)}, 0.0)) * 0.08);
+        gl_FragColor = vec4(vec3(0.9, 0.34, 0.18) * l * fade * 0.5, 1.0); }`,
   }));
-  floor.rotation.x = -Math.PI / 2; floor.position.y = -4.2;
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -4.1 + Y;
   scene.add(floor);
 
   let dist = 14;
   return {
-    scene, camera, bloom: [0.55, 0.6, 0.62], edge: 0x000000, vig: 1,
+    scene, camera, bloom: [0.7, 0.65, 0.82], edge: 0x000000, vig: 1, curve: 0.03,
     resize(w, h) {
       camera.aspect = w / h; camera.updateProjectionMatrix();
       const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-      dist = Math.max(3.5 / tan / 0.8, 3.5 / (tan * camera.aspect) / 0.95);
-      mat.uniforms.uSize.value = renderer.getPixelRatio() * (MOBILE ? 1.6 : 2.2);
+      dist = Math.max(3.6 / tan / 0.86, 3.6 / (tan * camera.aspect) / (MOBILE ? 0.78 : 0.46));
+      const pr = renderer.getPixelRatio();
+      pMat.uniforms.uSize.value = pr * (MOBILE ? 1.5 : 2.0);
+      mMat.uniforms.uSize.value = pr * 2;
     },
     update(t, time, dt, ptr) {
-      mat.uniforms.uTime.value = time;
-      mat.uniforms.uSpread.value = 1 - ease(clamp01(t / 0.55));
-      cloud.rotation.y = Math.sin(time * 0.25) * 0.25 + ptr.x * 0.35;
-      camera.position.set(ptr.x * 0.4, 0.3 + ptr.y * 0.3, dist * (1.25 - 0.25 * ease(clamp01(t / 0.6))));
-      camera.lookAt(MOBILE ? 0 : 0.6, MOBILE ? -1.2 : 0.1, 0);
+      const assemble = ease(clamp01(t / 0.4));
+      const scan = clamp01((t - 0.36) / 0.36) * 1.08;
+      pMat.uniforms.uTime.value = time; pMat.uniforms.uSpread.value = 1 - assemble; pMat.uniforms.uScan.value = scan;
+      photoMat.uniforms.uScan.value = scan; photoMat.uniforms.uTime.value = time;
+      halo.material.uniforms.uTime.value = time; halo.material.uniforms.uOn.value = 0.25 + 0.75 * smooth(0.3, 0.9, t);
+      mMat.uniforms.uTime.value = time;
+      const ringOn = smooth(0.55, 0.95, t);
+      rings.forEach((r, i) => { r.rotation.z += dt * (0.12 + i * 0.05) * (i % 2 ? -1 : 1); r.material.opacity = ringOn * (0.55 - i * 0.1); });
+      const lookY = MOBILE ? -2.6 : Y * 0.6; // phones: face in the top third, text below
+      camera.position.set(X * 0.62 + ptr.x * 0.3, 0.15 + lookY + ptr.y * 0.22, dist * (1.18 - 0.18 * assemble));
+      camera.lookAt(X * 0.62, lookY, 0);
     },
   };
 }
@@ -671,7 +765,7 @@ async function start() {
   await Promise.race([document.fonts ? document.fonts.ready : null, new Promise((r) => setTimeout(r, 2500))]); tick(0.55);
   const points = await pointsReq; tick(0.7);
 
-  const builders = { hero: () => makeHero(cells), work: makeWork, network: makeNetwork, signals: makeSignals, portrait: () => makePoints(points) };
+  const builders = { hero: () => makeHero(cells), work: makeWork, network: makeNetwork, signals: makeSignals, portrait: () => makeFinale(points) };
   const SCENES = site.names.map((n) => builders[n]());
   tick(0.9);
 
@@ -710,6 +804,7 @@ async function start() {
       bloom.enabled = st > 0; bloom.strength = st; bloom.radius = ra; bloom.threshold = th;
       cam.uniforms.uEdge.value.copy(edge.set(S.edge));
       cam.uniforms.uVig.value = S.vig;
+      cam.uniforms.uCurve.value = S.curve ?? 0.07;
       cam.uniforms.uBlack.value = S.light ? 0 : 0.03;
     }
     S.update(site.t, time, dt, pointer);

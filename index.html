@@ -21,7 +21,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@600..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@600..900&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
@@ -106,12 +106,12 @@ html.gl .scene.light { color: var(--ink-dark); }
 html.gl .scene h2.disp { margin: 0; }
 html.gl .panel { position: absolute; margin: 0; opacity: 0; visibility: hidden; transform: translateY(14px); transition: opacity .45s ease, transform .55s cubic-bezier(.2,.7,.2,1), visibility .45s; pointer-events: none; }
 html.gl .panel.on { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
-html.gl .panel.boxed { padding: 18px 20px 16px 22px; background: var(--glass); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-left: 1px solid var(--line); }
+html.gl .panel.boxed { max-height: calc(100vh - 210px); overflow-y: auto; overscroll-behavior: contain; padding: 18px 20px 16px 22px; background: var(--glass); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-left: 1px solid var(--line); }
 html.gl .panel.boxed::before, html.gl .panel.boxed::after { content: ''; position: absolute; left: -3px; width: 5px; height: 5px; background: var(--ink); }
 html.gl .panel.boxed::before { top: -2px; } html.gl .panel.boxed::after { bottom: -2px; }
 
 /* hero */
-.hero-name { font-size: clamp(42px, 7vw, 104px); }
+.hero-name { font-size: clamp(40px, 5.8vw, 86px); }
 .hero-sub { display: flex; gap: 3em; margin-top: 10px; font: 500 13px/1 var(--mono); letter-spacing: .14em; color: var(--ink-2); text-transform: uppercase; }
 .hero-tag { font: 600 15px/1.55 var(--mono); text-transform: uppercase; letter-spacing: .06em; text-align: justify; text-align-last: left; max-width: 34ch; margin: 0; }
 .hero-meta { font: 500 13px/1.6 var(--mono); color: var(--ink-2); max-width: 60ch; margin: 18px 0 0; }
@@ -218,6 +218,83 @@ dialog::backdrop { background: rgba(0,0,0,.72); -webkit-backdrop-filter: blur(4p
 .menu-nav a:hover { color: var(--accent); }
 .menu-quick { display: flex; flex-wrap: wrap; gap: 0 26px; margin-top: auto; padding-top: 32px; }
 
+/* ---------- editorial type: dot-matrix display + serif italics + mono ---------- */
+:root { --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif; }
+.serif-em, .statement em, .lede em, .steps h3 em, .years h3 em, .git h3 em, .sec-sub, .cert-name em {
+  font-family: var(--serif); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0;
+}
+.hero-tag .serif-em { font-size: 1.45em; line-height: 1; color: var(--accent); }
+.sec-h { font-size: clamp(30px, 4vw, 58px); }
+.sec-sub { font-size: clamp(20px, 2.1vw, 30px); color: var(--accent); margin: 6px 0 0; line-height: 1; text-shadow: 0 0 14px rgba(0,0,0,.8); }
+html.gl .panel.wide { width: min(640px, calc(100vw - 2 * var(--pad))) !important; }
+.statement { font: 400 clamp(18px, 1.6vw, 24px)/1.4 var(--sans); letter-spacing: -.01em; margin: 0 0 18px; }
+.statement em, .lede em { color: var(--accent); font-size: 1.2em; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0 0 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.stats b { display: block; font: 900 clamp(36px, 3.8vw, 56px)/.9 var(--display); color: var(--accent); text-shadow: 0 0 18px rgba(121,199,199,.45); }
+.stats span { display: block; margin-top: 8px; font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.small { font-size: 13.5px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.lede { font: 400 17px/1.5 var(--sans); margin: 0 0 16px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.steps li { display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: start; }
+.steps .num { font: 900 62px/.82 var(--display); color: transparent; -webkit-text-stroke: 1.2px var(--accent); }
+.steps h3 { font: 500 18px/1.25 var(--sans); margin: 0 0 5px; text-transform: none; }
+.steps h3 em { font-size: 1.22em; color: var(--accent); }
+.steps p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.see { display: flex; flex-wrap: wrap; gap: 0 14px; }
+.see .cmd { min-height: 36px; font-size: 12px; }
+.prompt { font: 600 15px/1.4 var(--mono); color: var(--live); margin: 0 0 6px; }
+.prompt span { color: var(--ink-3); margin-right: .45em; }
+.prompt i { font-style: normal; color: var(--accent); }
+.term-h { font-size: 12.5px; color: var(--ink-2); margin: 0 0 10px; }
+.summary { width: 100%; border-collapse: collapse; font: 400 13px/1.5 var(--mono); }
+.summary th, .summary td { text-align: left; vertical-align: top; padding: 9px 0; border-bottom: 1px dashed rgba(238,244,244,.2); }
+.summary thead th { font-weight: 500; font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--line); }
+.summary tbody th { width: 1%; white-space: nowrap; padding-right: 18px; font-weight: 600; color: var(--accent); }
+.summary tbody th i { display: block; font-style: normal; font-weight: 400; color: var(--ink-3); }
+.term-foot { margin: 10px 0 0; font-size: 12.5px; color: var(--ink-2); }
+.git .meta-line { font: 500 12.5px/1.5 var(--mono); color: var(--ink-2); margin: 0 0 8px; }
+.git .meta-line b { color: var(--live); }
+.git h3 { font: 500 22px/1.2 var(--sans); margin: 0 0 8px; text-transform: none; }
+.git h3 em { color: var(--accent); font-size: 1.15em; }
+.diff { list-style: none; padding: 0; margin: 10px 0 12px; display: grid; gap: 6px; font-size: 14px; line-height: 1.55; }
+.diff li { position: relative; padding-left: 1.4em; color: var(--ink-2); }
+.diff li::before { content: '+'; position: absolute; left: 0; font-weight: 700; color: var(--live); }
+.diff b { color: var(--ink); }
+.years { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; position: relative; }
+.years::before { content: ''; position: absolute; left: 92px; top: 6px; bottom: 6px; border-left: 1px dashed var(--line); }
+.years li { display: grid; grid-template-columns: 78px 44px 1fr; gap: 14px; align-items: start; }
+.yr { font: 900 34px/1 var(--display); color: var(--accent); text-shadow: 0 0 16px rgba(121,199,199,.4); }
+.years img, .years .mono-logo { width: 44px; height: 44px; object-fit: contain; background: #fff; border-radius: 8px; padding: 4px; position: relative; }
+.years .mono-logo { display: grid; place-items: center; font: 800 16px/1 var(--display); color: #0b0d0e; }
+.years h3 { font: 500 17px/1.25 var(--sans); margin: 0; text-transform: none; }
+.years h3 em { font-size: 1.15em; color: var(--accent); }
+.years p { margin: 4px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
+html.gl #journey .cert-wrap { width: min(520px, calc(100vw - 2 * var(--pad))); }
+.cert { position: relative; overflow: hidden; padding: 22px 22px 12px; border-radius: 16px; background: linear-gradient(135deg, #0f1a1d, #090d0f 55%, #18110c); box-shadow: 0 0 0 1px rgba(121,199,199,.38), 0 0 40px rgba(121,199,199,.12), 0 24px 60px rgba(0,0,0,.55); transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .25s ease; }
+.cert-shine { position: absolute; inset: -60% -40%; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(115deg, transparent 38%, rgba(121,199,199,.2) 46%, rgba(255,170,60,.18) 50%, rgba(190,130,255,.16) 54%, transparent 62%); animation: shine 5s ease-in-out infinite alternate; }
+@keyframes shine { from { transform: translateX(-28%); } to { transform: translateX(28%); } }
+.cert-k { position: relative; font: 600 12px/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 10px; }
+.panel .cert-name { position: relative; font: 900 clamp(30px, 3.2vw, 46px)/1 var(--display); text-transform: uppercase; margin: 0 0 8px; }
+.cert-name em { display: block; margin-top: 2px; font-size: .95em; color: #ffb347; }
+.cert-who { position: relative; font: 600 12.5px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 16px; }
+.cert-meta { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin: 0 0 6px; }
+.cert-meta dt { font: 500 11px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.cert-meta dd { margin: 3px 0 0; font: 500 14px/1.4 var(--mono); }
+.cert-meta .full { grid-column: 1 / -1; }
+.cert-meta .full dd { font-size: 12.5px; word-break: break-all; color: var(--ink-2); }
+.cert .cmd { position: relative; }
+.contact-h .serif-em { display: inline-block; font-size: 1.2em; color: #ffb38a; margin-top: 4px; }
+.p-contact .label { color: #ffb38a; }
+
+/* reveals: words, list items and table rows arrive in a stagger when their panel turns on */
+.split .w { display: inline-block; }
+html.gl .panel .split .w { opacity: 0; transform: translateY(.5em); filter: blur(6px); transition: opacity .5s ease, transform .6s cubic-bezier(.2,.7,.2,1), filter .5s ease; transition-delay: calc(var(--i) * 18ms); }
+html.gl .panel.on .split .w { opacity: 1; transform: none; filter: none; }
+html.gl .panel .steps > li, html.gl .panel .years > li, html.gl .panel .summary tbody tr, html.gl .panel .stats > div, html.gl .panel .diff > li { opacity: 0; transform: translateX(-16px); transition: opacity .5s ease, transform .65s cubic-bezier(.2,.7,.2,1); }
+html.gl .panel.on .steps > li, html.gl .panel.on .years > li, html.gl .panel.on .summary tbody tr, html.gl .panel.on .stats > div, html.gl .panel.on .diff > li { opacity: 1; transform: none; }
+html.gl .panel.on :is(.steps, .years, .stats, .diff, .summary tbody) > :nth-child(2) { transition-delay: .12s; }
+html.gl .panel.on :is(.steps, .years, .stats, .diff, .summary tbody) > :nth-child(3) { transition-delay: .24s; }
+
 @media (max-width: 760px) {
   html.gl #top .p-name { top: auto; bottom: calc(150px + env(safe-area-inset-bottom)); transform: none; }
   html.gl #top .p-name.on { transform: none; }
@@ -236,7 +313,21 @@ dialog::backdrop { background: rgba(0,0,0,.72); -webkit-backdrop-filter: blur(4p
   .bar { grid-template-columns: 1fr 52px; }
   .bar .lb { grid-column: 1 / -1; }
   .hud .talk-t { display: none; }
-  html.gl #contact .p-contact { top: auto; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateY(14px); }
+  .steps li { grid-template-columns: 50px 1fr; gap: 10px; }
+  .steps .num { font-size: 42px; }
+  .steps h3 { font-size: 16px; }
+  .years::before { left: 66px; }
+  .years li { grid-template-columns: 56px 36px 1fr; gap: 10px; }
+  .yr { font-size: 24px; }
+  .years img, .years .mono-logo { width: 36px; height: 36px; }
+  .stats b { font-size: 32px; }
+  .stats span { font-size: 10.5px; }
+  .statement { font-size: 17px; }
+  .summary tbody th { white-space: normal; width: 34%; padding-right: 10px; }
+  .summary { font-size: 12px; }
+  .sec-sub { font-size: 20px; }
+  .cert-name { font-size: 28px; }
+  html.gl #contact .p-contact { top: auto; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateY(14px); padding: 16px 16px 10px; background: rgba(5,3,4,.66); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-left: 1px solid rgba(255,179,138,.5); }
   .foot { font-size: 11px; gap: 2px 12px; }
   .foot span:last-child { display: none; }
   html.gl #contact .p-contact.on { transform: none; }
@@ -262,11 +353,11 @@ dialog::backdrop { background: rgba(0,0,0,.72); -webkit-backdrop-filter: blur(4p
 <main id="content">
   <section class="scene" id="top" data-scene="hero" data-len="1.5" aria-labelledby="hero-h">
     <div class="panel p-name" data-at="0,0.82">
-      <h1 class="disp hero-name" id="hero-h"><span class="sr">Md Yusuf Jawed</span><span class="scr" aria-hidden="true" data-text="Yusuf Jawed">Yusuf Jawed</span></h1>
+      <h1 class="disp hero-name" id="hero-h"><span class="sr">Md Yusuf Jawed</span><span aria-hidden="true"><span class="scr" data-text="Md Yusuf">Md Yusuf</span><br><span class="scr" data-text="Jawed">Jawed</span></span></h1>
       <div class="hero-sub"><span>// Portfolio</span><span>2026</span></div>
     </div>
     <div class="panel p-tag" data-at="0,0.82">
-      <p class="hero-tag">AI/ML and full-stack engineer building systems that learn, explain and ship.</p>
+      <p class="hero-tag">AI/ML and full-stack engineer building systems that <em class="serif-em">learn, explain and ship.</em></p>
     </div>
     <div class="panel p-meta" data-at="0,0.62">
       <p class="hero-meta">Final-year B.Tech CSE (AI &amp; ML) at SRM IST · AWS Certified Cloud Practitioner · six months of client-facing web development.</p>
@@ -294,67 +385,93 @@ dialog::backdrop { background: rgba(0,0,0,.72); -webkit-backdrop-filter: blur(4p
   </section>
 
   <section class="scene" id="about" data-scene="network" data-len="5.4" aria-labelledby="about-h">
-    <div class="panel p-head" data-at="0,1"><h2 class="disp" id="about-h" style="font-size:clamp(28px,3.4vw,46px)"><span class="sr">About</span><span class="scr" aria-hidden="true" data-text="About">About</span></h2></div>
-    <div class="panel boxed" data-at="0.02,0.2">
-      <p class="label">about me</p>
-      <p>I design, build and evaluate applied AI systems: an AI agent that operates a computer, reinforcement learning on a hospital digital twin, retrieval-augmented generation with citation-grounded answers, and full-stack tools deployed as working web apps.</p>
-      <p>Final-year B.Tech CSE (AI &amp; ML) student at SRM IST and AWS Certified Cloud Practitioner, with six months of client-facing web development. I am looking for an AI/ML or software engineering role.</p>
+    <div class="panel p-head" data-at="0,1"><h2 class="disp sec-h" id="about-h"><span class="sr">About</span><span class="scr" aria-hidden="true" data-text="About">About</span></h2><p class="sec-sub">the person behind the models</p></div>
+    <div class="panel boxed wide" data-at="0.02,0.2">
+      <p class="label">00 · about me</p>
+      <p class="statement split">I <em>design</em>, <em>build</em> and <em>evaluate</em> applied AI systems: an AI agent that operates a computer, reinforcement learning on a hospital digital twin, retrieval-augmented generation with citation-grounded answers, and full-stack tools deployed as working web apps.</p>
+      <div class="stats">
+        <div><b>7</b><span>live apps you can open</span></div>
+        <div><b>6</b><span>months of client-facing web work</span></div>
+        <div><b>0</b><span>safety violations in 200 agent runs</span></div>
+      </div>
+      <p class="small">Final-year B.Tech CSE (AI &amp; ML) student at SRM IST and AWS Certified Cloud Practitioner, looking for an AI/ML or software engineering role.</p>
     </div>
-    <div class="panel boxed" data-at="0.22,0.4">
+    <div class="panel boxed wide" data-at="0.22,0.4">
       <p class="label">how I work · 01–03</p>
-      <p style="font-size:14.5px;color:var(--ink-2)">I start from the friction in a workflow, test AI options against it, build something simple, put it online and write down why I made each choice.</p>
-      <ol class="how">
-        <li><b><span class="n">01</span>Build tools and scripts</b><p>Small, single-purpose code: a Python pipeline from PDF to cited answer, ESP32 firmware in C/C++, and a NEWS2-based alert engine in JavaScript covered by 40 Jest tests.</p><div class="see"><button class="cmd" data-case="healthmonitor">HealthMonitor</button><button class="cmd" data-case="meddoc">MedDoc RAG</button></div></li>
-        <li><b><span class="n">02</span>Test AI options rigorously</b><p>3 chunking strategies against 5 retrievers on a 48-question set I wrote, scored with Hit@k, MRR and bootstrap confidence intervals. Hybrid search showed no significant gain, so I shipped the simpler pipeline.</p><div class="see"><button class="cmd" data-case="meddoc">MedDoc RAG</button><button class="cmd" data-case="neuro">Neuro</button></div></li>
-        <li><b><span class="n">03</span>Deploy so people can use it</b><p>Vercel serverless functions that keep API keys off the browser, Docker images, GitHub Actions and a Jenkins pipeline on AWS EC2. Most projects have a live link.</p><div class="see"><button class="cmd" data-case="healix">Healix</button><button class="cmd" data-case="meddoc">MedDoc RAG</button></div></li>
+      <p class="lede split">I start from the friction in a workflow, test AI options against it, build something simple, put it online and write down <em>why</em> I made each choice.</p>
+      <ol class="steps">
+        <li><span class="num" aria-hidden="true">01</span><div><h3>Build tools <em>and</em> scripts</h3><p>Small, single-purpose code: a Python pipeline from PDF to cited answer, ESP32 firmware in C/C++, and a NEWS2-based alert engine in JavaScript covered by 40 Jest tests.</p><div class="see"><button class="cmd" data-case="healthmonitor">HealthMonitor</button><button class="cmd" data-case="meddoc">MedDoc RAG</button></div></div></li>
+        <li><span class="num" aria-hidden="true">02</span><div><h3>Test AI options <em>rigorously</em></h3><p>3 chunking strategies against 5 retrievers on a 48-question set I wrote, scored with Hit@k, MRR and bootstrap confidence intervals. Hybrid search showed no significant gain, so I shipped the simpler pipeline.</p><div class="see"><button class="cmd" data-case="meddoc">MedDoc RAG</button><button class="cmd" data-case="neuro">Neuro</button></div></div></li>
+        <li><span class="num" aria-hidden="true">03</span><div><h3>Deploy so people <em>can use it</em></h3><p>Vercel serverless functions that keep API keys off the browser, Docker images, GitHub Actions and a Jenkins pipeline on AWS EC2. Most projects have a live link.</p><div class="see"><button class="cmd" data-case="healix">Healix</button><button class="cmd" data-case="meddoc">MedDoc RAG</button></div></div></li>
       </ol>
     </div>
-    <div class="panel boxed" data-at="0.42,0.6">
+    <div class="panel boxed wide" data-at="0.42,0.6">
       <p class="label">how I work · 04–06</p>
-      <ol class="how">
-        <li><b><span class="n">04</span>Visual and interactive work</b><p>Five interactive 3D models in Three.js and React Three Fiber, a live Chart.js view of sensor data, and scroll, hover and looping animation on client sites.</p><div class="see"><button class="cmd" data-case="healix">Healix</button><button class="cmd" data-case="dapprush">DAPPRUSH</button></div></li>
-        <li><b><span class="n">05</span>Work with non-engineers</b><p>Six months of remote client work for a studio in Dubai: their own site plus 3+ client websites and web apps with Firebase integration, applying client feedback and handling domain setup.</p><div class="see"><button class="cmd" data-case="dapprush">DAPPRUSH Studios</button></div></li>
-        <li><b><span class="n">06</span>Document the decisions</b><p>Every result here sits next to its sample size, its baseline and what it is not for, so a reader can judge the number without asking me.</p><div class="see"><button class="cmd" data-case="neuro">Neuro</button><button class="cmd" data-case="meddoc">MedDoc RAG</button></div></li>
+      <ol class="steps">
+        <li><span class="num" aria-hidden="true">04</span><div><h3>Visual <em>and</em> interactive work</h3><p>Five interactive 3D models in Three.js and React Three Fiber, a live Chart.js view of sensor data, and scroll, hover and looping animation on client sites.</p><div class="see"><button class="cmd" data-case="healix">Healix</button><button class="cmd" data-case="dapprush">DAPPRUSH</button></div></div></li>
+        <li><span class="num" aria-hidden="true">05</span><div><h3>Work with <em>non-engineers</em></h3><p>Six months of remote client work for a studio in Dubai: their own site plus 3+ client websites and web apps with Firebase integration, applying client feedback and handling domain setup.</p><div class="see"><button class="cmd" data-case="dapprush">DAPPRUSH Studios</button></div></div></li>
+        <li><span class="num" aria-hidden="true">06</span><div><h3>Document <em>the decisions</em></h3><p>Every result here sits next to its sample size, its baseline and what it is not for, so a reader can judge the number without asking me.</p><div class="see"><button class="cmd" data-case="neuro">Neuro</button><button class="cmd" data-case="meddoc">MedDoc RAG</button></div></div></li>
       </ol>
     </div>
-    <div class="panel boxed" data-at="0.62,0.8">
-      <p class="label">stack · languages, AI and ML</p>
-      <div class="stack-g"><h3>Languages</h3><ul class="chips"><li>Python</li><li>JavaScript</li><li>TypeScript</li><li>SQL</li><li>C</li><li>C++</li></ul></div>
-      <div class="stack-g"><h3>AI and ML</h3><ul class="chips"><li>PyTorch</li><li>Reinforcement learning</li><li>LLM agents</li><li>RAG</li><li>scikit-learn</li><li>XGBoost</li><li>LightGBM</li><li>SHAP</li><li>Pandas</li><li>NumPy</li><li>FAISS</li><li>Gymnasium</li><li>Ollama</li><li>OpenRouter</li></ul></div>
-      <div class="stack-g"><h3>Methods</h3><ul class="chips"><li>Machine learning</li><li>Deep learning</li><li>Feature engineering</li><li>Explainable AI</li><li>LLM evaluation</li><li>Information retrieval</li><li>PCA</li><li>SMOTE</li></ul></div>
+    <div class="panel boxed wide term" data-at="0.62,0.8">
+      <p class="prompt"><span aria-hidden="true">&gt;&gt;&gt;</span> yusuf.summary()</p>
+      <p class="term-h">Model: "md_yusuf_jawed" · skills, part 1 of 2</p>
+      <table class="summary">
+        <thead><tr><th scope="col">Layer (type)</th><th scope="col">Weights</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">languages <i>(Input)</i></th><td>Python · JavaScript · TypeScript · SQL · C · C++</td></tr>
+          <tr><th scope="row">ai_ml <i>(Transformer)</i></th><td>PyTorch · reinforcement learning · LLM agents · RAG · scikit-learn · XGBoost · LightGBM · SHAP · Pandas · NumPy · FAISS · Gymnasium · Ollama · OpenRouter</td></tr>
+          <tr><th scope="row">methods <i>(Attention)</i></th><td>machine learning · deep learning · feature engineering · explainable AI · LLM evaluation · information retrieval · PCA · SMOTE</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="panel boxed" data-at="0.82,1">
-      <p class="label">stack · web, cloud and hardware</p>
-      <div class="stack-g"><h3>Web and 3D</h3><ul class="chips"><li>React</li><li>Next.js</li><li>Vite</li><li>HTML5</li><li>CSS</li><li>Tailwind CSS</li><li>Three.js</li><li>React Three Fiber</li><li>Chart.js</li><li>Framer</li><li>Streamlit</li></ul></div>
-      <div class="stack-g"><h3>Back end, cloud and testing</h3><ul class="chips"><li>Node.js</li><li>Express</li><li>FastAPI</li><li>Firebase</li><li>JWT</li><li>AWS EC2</li><li>Docker</li><li>Jenkins</li><li>GitHub Actions</li><li>Vercel</li><li>pytest</li><li>Jest</li></ul></div>
-      <div class="stack-g"><h3>IoT and foundations</h3><ul class="chips"><li>ESP32</li><li>Embedded C/C++</li><li>MAX30102</li><li>DS18B20</li><li>DSA</li><li>OOP</li><li>DBMS</li><li>Operating systems</li><li>Computer networks</li></ul></div>
+    <div class="panel boxed wide term" data-at="0.82,1">
+      <p class="prompt"><span aria-hidden="true">&gt;&gt;&gt;</span> yusuf.summary(<i>part=2</i>)</p>
+      <table class="summary">
+        <thead><tr><th scope="col">Layer (type)</th><th scope="col">Weights</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">web_3d <i>(Conv2D)</i></th><td>React · Next.js · Vite · HTML5 · CSS · Tailwind CSS · Three.js · React Three Fiber · Chart.js · Framer · Streamlit</td></tr>
+          <tr><th scope="row">backend_cloud <i>(Dense)</i></th><td>Node.js · Express · FastAPI · Firebase · JWT · AWS EC2 · Docker · Jenkins · GitHub Actions · Vercel · pytest · Jest</td></tr>
+          <tr><th scope="row">iot_foundations <i>(Embedding)</i></th><td>ESP32 · embedded C/C++ · MAX30102 · DS18B20 · DSA · OOP · DBMS · operating systems · computer networks</td></tr>
+        </tbody>
+      </table>
+      <p class="term-foot">Total layers: 6 · Trainable params: all of them, still training</p>
     </div>
   </section>
 
   <section class="scene" id="journey" data-scene="signals" data-len="3.6" aria-labelledby="journey-h">
-    <div class="panel p-head" data-at="0,1"><h2 class="disp" id="journey-h" style="font-size:clamp(28px,3.4vw,46px)"><span class="sr">Experience and education</span><span class="scr" aria-hidden="true" data-text="Experience">Experience</span></h2></div>
-    <div class="panel boxed" data-at="0.02,0.33"><p class="label">experience · Internship · full-time · Mar–Aug 2025 · Remote, Dubai, UAE</p><h3>DAPPRUSH Studios · Web Development Intern</h3><p>Six months building and launching complete websites and web apps for a creative tech studio in Dubai and its clients, working directly with clients.</p><p><b>Client work.</b> 3+ more portfolio and client websites and web apps in the same six months, with Firebase integration, each responsive, with client feedback applied and domain setup handled.</p><p><b>Result.</b> The studio site is live on its custom domain.</p><ul class="chips"><li>Framer</li><li>HTML5</li><li>CSS</li><li>JavaScript</li><li>Firebase</li></ul><div class="acts" style="display:flex;flex-wrap:wrap;gap:0 20px;margin-top:6px"><button class="cmd" type="button" data-case="dapprush">Case study</button><a class="cmd" href="https://dapprushstudios.com" target="_blank" rel="noopener">dapprushstudios.com</a></div></div>
-    <div class="panel boxed" data-at="0.35,0.66">
+    <div class="panel p-head" data-at="0,1"><h2 class="disp sec-h" id="journey-h"><span class="sr">Experience, education and certification</span><span class="scr" aria-hidden="true" data-text="Experience">Experience</span></h2><p class="sec-sub">the signal so far</p></div>
+    <div class="panel boxed wide term git" data-at="0.02,0.33"><p class="prompt"><span aria-hidden="true">$</span> git log --author="Md Yusuf Jawed"</p><p class="meta-line"><b aria-hidden="true">●</b> Mar–Aug 2025 · Internship · full-time · Remote, Dubai, UAE</p><h3>DAPPRUSH Studios · <em>Web Development Intern</em></h3><p class="small">Six months building and launching complete websites and web apps for a creative tech studio in Dubai and its clients, working directly with clients.</p><ul class="diff"><li><b>Built.</b> The studio site in Framer, in a customised dark cinematic theme: a looping-video hero, seven service video cards, testimonials, an FAQ accordion, tickers, a contact section and a scrolling gallery. Scroll-reveal, hover and looping animations adapted from code snippets (triggers, timing, styling, mobile fixes), plus background audio.</li><li><b>Client work.</b> 3+ more portfolio and client websites and web apps in the same six months, with Firebase integration, each responsive, with client feedback applied and domain setup handled.</li><li><b>Result.</b> The studio site is live on its custom domain.</li></ul><ul class="chips"><li>Framer</li><li>HTML5</li><li>CSS</li><li>JavaScript</li><li>Firebase</li></ul><div class="see" style="margin-top:6px"><button class="cmd" type="button" data-case="dapprush">Case study</button><a class="cmd" href="https://dapprushstudios.com" target="_blank" rel="noopener">dapprushstudios.com</a></div></div>
+    <div class="panel boxed wide" data-at="0.35,0.66">
       <p class="label">education</p>
-      <div class="edu">
-        <div class="edu-i"><img src="assets/logos/srm.webp" alt="" width="44" height="44" loading="lazy"><div><h3>SRM Institute of Science and Technology</h3><p>B.Tech, Computer Science and Engineering (AI &amp; ML) · Expected 2027 · Kattankulathur, Tamil Nadu</p></div></div>
-        <div class="edu-i"><span class="mono-logo" aria-hidden="true">PS</span><div><h3>Prakritik School</h3><p>Class XII · 2022 · Senior Secondary, CBSE · Physics, Chemistry, Biology, Mathematics · Patna, Bihar</p></div></div>
-        <div class="edu-i"><img src="assets/logos/dps-patna.webp" alt="" width="44" height="44" loading="lazy"><div><h3>Delhi Public School, Patna</h3><p>Class X · 2020 · Secondary, CBSE · Physics, Chemistry, Biology, Mathematics · Patna, Bihar</p></div></div>
-      </div>
+      <ol class="years">
+        <li><span class="yr">2027</span><img src="assets/logos/srm.webp" alt="" width="44" height="44" loading="lazy"><div><h3>SRM Institute of <em>Science and Technology</em></h3><p>B.Tech, Computer Science and Engineering (AI &amp; ML) · expected 2027 · Kattankulathur, Tamil Nadu</p></div></li>
+        <li><span class="yr">2022</span><span class="mono-logo" aria-hidden="true">PS</span><div><h3>Prakritik <em>School</em></h3><p>Class XII · Senior Secondary, CBSE · Physics, Chemistry, Biology, Mathematics · Patna, Bihar</p></div></li>
+        <li><span class="yr">2020</span><img src="assets/logos/dps-patna.webp" alt="" width="44" height="44" loading="lazy"><div><h3>Delhi Public School, <em>Patna</em></h3><p>Class X · Secondary, CBSE · Physics, Chemistry, Biology, Mathematics · Patna, Bihar</p></div></li>
+      </ol>
     </div>
-    <div class="panel boxed" data-at="0.68,1">
+    <div class="panel cert-wrap" data-at="0.68,1">
       <p class="label">certification</p>
-      <h3><span class="aws" aria-hidden="true"></span>AWS Certified Cloud Practitioner</h3>
-      <p>Amazon Web Services · Issued 4 November 2026 · Valid until 4 November 2029</p>
-      <p class="cert-num">Validation number 661adb22fc344cb5b5d22af47e527ebc</p>
-      <a class="cmd" href="https://aws.amazon.com/verification" target="_blank" rel="noopener">Verify at aws.amazon.com/verification</a>
+      <div class="cert">
+        <div class="cert-shine" aria-hidden="true"></div>
+        <p class="cert-k"><span class="aws" aria-hidden="true"></span>Amazon Web Services · certified</p>
+        <h3 class="cert-name">Cloud <em>Practitioner</em></h3>
+        <p class="cert-who">Md Yusuf Jawed</p>
+        <dl class="cert-meta">
+          <div><dt>Issued</dt><dd>4 Nov 2026</dd></div>
+          <div><dt>Valid until</dt><dd>4 Nov 2029</dd></div>
+          <div class="full"><dt>Validation number</dt><dd>661adb22fc344cb5b5d22af47e527ebc</dd></div>
+        </dl>
+        <a class="cmd" href="https://aws.amazon.com/verification" target="_blank" rel="noopener">Verify at aws.amazon.com/verification</a>
+      </div>
     </div>
   </section>
 
-  <section class="scene" id="contact" data-scene="portrait" data-len="1.8" aria-labelledby="contact-h">
-    <div class="panel p-contact" data-at="0.2,1">
-      <h2 class="disp contact-h" id="contact-h"><span class="sr">Let’s talk about your next role</span><span class="scr" aria-hidden="true" data-text="Let’s talk about your next role">Let’s talk about your next role</span></h2>
-      <p class="contact-p">I am looking for a role where I can build practical AI tools and keep learning from the people who use them every day.</p>
+  <section class="scene" id="contact" data-scene="portrait" data-len="2.4" aria-labelledby="contact-h">
+    <div class="panel p-contact" data-at="0.35,1">
+      <p class="label">04 · contact</p>
+      <h2 class="disp contact-h" id="contact-h"><span class="sr">Let’s talk about your next role</span><span aria-hidden="true"><span class="scr" data-text="Let’s talk about">Let’s talk about</span><br><em class="serif-em">your next role</em></span></h2>
+      <p class="contact-p split">I am looking for a role where I can build practical AI tools and keep learning from the people who use them every day.</p>
       <div class="contact-links">
         <a class="cmd" href="mailto:yusufjawed8@gmail.com">yusufjawed8@gmail.com</a>
         <button class="cmd" type="button" id="copy-email">Copy email</button>
@@ -364,7 +481,7 @@ dialog::backdrop { background: rgba(0,0,0,.72); -webkit-backdrop-filter: blur(4p
       </div>
       <p class="copy-msg" id="copy-msg" role="status" aria-live="polite"></p>
     </div>
-    <div class="panel p-foot" data-at="0.2,1">
+    <div class="panel p-foot" data-at="0.35,1">
       <div class="foot"><span>© 2026 Md Yusuf Jawed</span><span>Tamil Nadu, India · +91 7903810922</span><span>Built with Three.js</span></div>
     </div>
   </section>
