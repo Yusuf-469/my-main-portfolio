@@ -142,13 +142,14 @@ function makeHero(data) {
 
   const N = data.n, cells = data.cells, count = cells.length / 4, U = 7 / N;
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uIntro: { value: 0 }, uExit: { value: 0 }, uCursor: { value: new THREE.Vector3(99, 99, 0) }, uTint: { value: TEAL } },
+    uniforms: { uTime: { value: 0 }, uIntro: { value: 0 }, uExit: { value: 0 }, uCursor: { value: new THREE.Vector3(99, 99, 0) }, uTint: { value: TEAL }, uPhoto: { value: null }, uHas: { value: 0 } },
     vertexShader: /* glsl */ `
       attribute float aLum, aSeed, aSize; uniform float uTime, uExit; uniform vec3 uCursor;
-      varying vec2 vUv; varying float vLum, vSeed, vB, vPush;
+      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush;
       void main(){
-        vUv = uv; vLum = aLum; vSeed = aSeed; vB = 0.55 / aSize;
+        vUv = uv; vLum = aLum; vSeed = aSeed; vB = 0.13 / sqrt(aSize);
         vec4 p = instanceMatrix * vec4(position, 1.0);
+        vPhoto = p.xy / 7.0 + 0.5; // the portrait spans 7 units, centred
         vec3 ctr = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
         vec2 d = ctr.xy - uCursor.xy;
         float f = exp(-dot(d, d) / 0.45) * uCursor.z;
@@ -163,16 +164,27 @@ function makeHero(data) {
         gl_Position = projectionMatrix * modelViewMatrix * p;
       }`,
     fragmentShader: /* glsl */ `
-      uniform float uTime, uIntro, uExit; uniform vec3 uTint; varying vec2 vUv; varying float vLum, vSeed, vB, vPush;
+      uniform float uTime, uIntro, uExit, uHas; uniform vec3 uTint; uniform sampler2D uPhoto;
+      varying vec2 vUv, vPhoto; varying float vLum, vSeed, vB, vPush;
       void main(){
         if (vSeed > uIntro) discard;
         vec2 e = min(vUv, 1.0 - vUv);
         float border = step(min(e.x, e.y), vB);
         float flick = step(0.997, fract(sin(vSeed * 7123.1 + floor(uTime * 9.0)) * 9123.7));
-        vec3 base = mix(uTint * 0.09, mix(uTint, vec3(1.0), 0.72), pow(vLum, 1.15));
-        vec3 col = mix(base, base * 0.22, border) + flick * 0.7 + vPush * uTint * 0.6;
+        // full photo detail inside each block (same grade as before), flat block tone until it loads
+        float l = vLum;
+        if (uHas > 0.5) {
+          vec3 ph = texture2D(uPhoto, vPhoto).rgb;
+          l = clamp((dot(ph, vec3(0.299, 0.587, 0.114)) - 0.05) / 0.98, 0.0, 1.0);
+        }
+        vec3 base = mix(uTint * 0.09, mix(uTint, vec3(1.0), 0.66), pow(l, 1.2));
+        vec3 col = mix(base, base * 0.35, border) + flick * 0.7 + vPush * uTint * 0.6;
         gl_FragColor = vec4(col * (1.0 - uExit * 0.55), 1.0);
       }`,
+  });
+  new THREE.TextureLoader().load('assets/portrait-cut.webp', (tx) => {
+    tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 4;
+    mat.uniforms.uPhoto.value = tx; mat.uniforms.uHas.value = 1;
   });
   const mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), mat, count);
   const lum = new Float32Array(count), seed = new Float32Array(count), size = new Float32Array(count);
@@ -193,7 +205,7 @@ function makeHero(data) {
   const ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), hit = new THREE.Vector3();
   const cur = mat.uniforms.uCursor.value;
   return {
-    scene, camera, bloom: [0.55, 0.5, 0.55], edge: 0x000000, vig: 1,
+    scene, camera, bloom: [0.45, 0.5, 0.82], edge: 0x000000, vig: 1,
     resize(w, h) {
       camera.aspect = w / h; camera.updateProjectionMatrix();
       const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
@@ -982,7 +994,7 @@ function makeSignals() {
 // ---------------------------------------------------------------- contact: the portrait, resolved
 // A colour point cloud of the photo assembles, then a scan beam sweeps down and reveals the
 // cleaned-up cut-out photo (assets/portrait-cut.webp) flat and undistorted; the points it passes
-// dissolve upward as sparks. A warm rim light, a halo, holographic rings and drifting motes finish it.
+// dissolve upward as sparks. A warm rim light, holographic rings and drifting motes finish it.
 function makeFinale(data) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x050304);
@@ -992,21 +1004,6 @@ function makeFinale(data) {
   const rig = new THREE.Group();
   rig.position.set(X, Y, 0);
   scene.add(rig);
-
-  // halo and soft light rays behind the head
-  const halo = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uOn: { value: 0 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    vertexShader: VS_UV,
-    fragmentShader: /* glsl */ `uniform float uTime, uOn; varying vec2 vUv;
-      void main(){ vec2 q = vUv - vec2(0.5, 0.58); float r = length(q); float a = atan(q.y, q.x);
-        float glow = exp(-r * 5.0) * 0.55 + exp(-r * 14.0) * 0.5;
-        float rays = pow(0.5 + 0.5 * sin(a * 18.0 + uTime * 0.25) * sin(a * 7.0 - uTime * 0.18), 3.0) * exp(-r * 3.2) * 0.35;
-        vec3 c = mix(vec3(1.0, 0.42, 0.2), vec3(0.47, 0.78, 0.78), smoothstep(0.0, 0.5, r));
-        float edge = smoothstep(0.5, 0.3, max(abs(vUv.x - 0.5), abs(vUv.y - 0.5)));
-        gl_FragColor = vec4(c * (glow + rays) * uOn * edge, 1.0); }`,
-  }));
-  halo.position.set(0, 0.3, -1.6);
-  rig.add(halo);
 
   // point cloud
   const pos = new Float32Array(count * 3), col = new Float32Array(count * 3), seed = new Float32Array(count), yn = new Float32Array(count);
@@ -1132,7 +1129,6 @@ function makeFinale(data) {
       const scan = clamp01((t - 0.36) / 0.36) * 1.08;
       pMat.uniforms.uTime.value = time; pMat.uniforms.uSpread.value = 1 - assemble; pMat.uniforms.uScan.value = scan;
       photoMat.uniforms.uScan.value = scan; photoMat.uniforms.uTime.value = time;
-      halo.material.uniforms.uTime.value = time; halo.material.uniforms.uOn.value = 0.25 + 0.75 * smooth(0.3, 0.9, t);
       mMat.uniforms.uTime.value = time;
       const ringOn = smooth(0.55, 0.95, t);
       rings.forEach((r, i) => { r.rotation.z += dt * (0.12 + i * 0.05) * (i % 2 ? -1 : 1); r.material.opacity = ringOn * (0.55 - i * 0.1); });
