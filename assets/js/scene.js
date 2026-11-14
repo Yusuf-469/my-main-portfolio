@@ -1009,7 +1009,7 @@ function makeSignals() {
 // ---------------------------------------------------------------- contact: the portrait, resolved
 // A colour point cloud of the photo assembles, then a scan beam sweeps down and reveals the
 // cleaned-up cut-out photo (assets/portrait-cut.webp) flat and undistorted; the points it passes
-// dissolve upward as sparks. A warm rim light, holographic rings and drifting motes finish it.
+// dissolve upward as sparks; motes drift in the background.
 function makeFinale(data) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x050304);
@@ -1082,17 +1082,6 @@ function makeFinale(data) {
   photo.position.z = 0.05;
   rig.add(photo);
 
-  // holographic rings around the head
-  const rings = [3.1, 3.55, 4.1].map((r, i) => {
-    const m = new THREE.Mesh(new THREE.TorusGeometry(r, 0.012, 6, 240), new THREE.MeshBasicMaterial({
-      color: i === 1 ? new THREE.Color(1.6, 0.75, 0.45) : new THREE.Color(0.55, 1.1, 1.1), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending,
-    }));
-    m.position.set(0, 1.1 - i * 0.5, 0);
-    m.rotation.set(Math.PI / 2 - 0.22 + i * 0.12, 0, i * 0.4);
-    rig.add(m);
-    return m;
-  });
-
   // motes drifting upward
   const nM = Math.round(700 * Q);
   const mpos = new Float32Array(nM * 3), mseed = new Float32Array(nM);
@@ -1143,8 +1132,6 @@ function makeFinale(data) {
       photoMat.uniforms.uScan.value = scan; photoMat.uniforms.uTime.value = time;
       cloud.visible = scan < 1.2; // every point has dissolved by now; none stay on the photo
       mMat.uniforms.uTime.value = time;
-      const ringOn = smooth(0.55, 0.95, t);
-      rings.forEach((r, i) => { r.rotation.z += dt * (0.12 + i * 0.05) * (i % 2 ? -1 : 1); r.material.opacity = ringOn * (0.55 - i * 0.1); });
       const lookY = MOBILE ? -2.6 : Y * 0.6; // phones: face in the top third, text below
       camera.position.set(X * 0.62 + ptr.x * 0.3, 0.15 + lookY + ptr.y * 0.22, dist * (1.18 - 0.18 * assemble));
       camera.lookAt(X * 0.62, lookY, 0);
